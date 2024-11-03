@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Vocal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .chat-container {
+            text-align: center;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        #speak-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #speak-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h1>Chatbot Vocal</h1>
+        <button id="speak-button">Parler</button>
+    </div>
+
+    <script>
+        const speakButton = document.getElementById('speak-button');
+
+        // Vérification de la prise en charge de la synthèse vocale et de la reconnaissance vocale
+        if (!('speechSynthesis' in window) || !('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+            alert("Votre navigateur ne prend pas en charge la synthèse ou la reconnaissance vocale.");
+        }
+
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'fr-FR';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        // Fonction pour faire parler le chatbot
+        function speakText(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'fr-FR';
+            utterance.onend = () => console.log('La parole est terminée.');
+            utterance.onerror = (event) => console.error('Erreur de synthèse vocale:', event.error);
+            speechSynthesis.speak(utterance);
+        }
+
+        // Événement pour commencer la reconnaissance vocale
+        speakButton.addEventListener('click', () => {
+            recognition.start();
+            console.log("Reconnaissance vocale activée.");
+        });
+
+        // Événement lorsque l'utilisateur parle
+        recognition.onresult = (event) => {
+            const userInput = event.results[0][0].transcript;
+            console.log("Vous avez dit :", userInput);
+            const botResponse = `Vous avez dit : "${userInput}". Comment puis-je vous aider ?`;
+            speakText(botResponse);
+        };
+
+        // Événement lorsque la reconnaissance vocale se termine
+        recognition.onspeechend = () => {
+            recognition.stop();
+            console.log("Reconnaissance vocale arrêtée.");
+        };
+
+        // Événement d'erreur de reconnaissance vocale
+        recognition.onerror = (event) => {
+            console.error("Erreur de reconnaissance vocale :", event.error);
+            speakText(`Erreur de reconnaissance vocale : ${event.error}`);
+        };
+    </script>
+</body>
+</html>
