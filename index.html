@@ -65,15 +65,18 @@
 
         // Événement pour commencer la reconnaissance vocale
         speakButton.addEventListener('click', () => {
+            console.log("Bouton cliqué, démarrage de la reconnaissance vocale.");
             recognition.start();
-            console.log("Reconnaissance vocale activée.");
         });
 
         // Événement lorsque l'utilisateur parle
         recognition.onresult = (event) => {
             const userInput = event.results[0][0].transcript;
-            console.log("Vous avez dit :", userInput);
+            console.log("Texte reconnu :", userInput);
+
+            // Réponse du chatbot
             const botResponse = `Vous avez dit : "${userInput}". Comment puis-je vous aider ?`;
+            console.log("Réponse générée :", botResponse);
             speakText(botResponse);
         };
 
