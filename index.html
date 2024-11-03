@@ -63,6 +63,9 @@
             speechSynthesis.speak(utterance);
         }
 
+        // Test de synthèse vocale au chargement de la page
+        speakText("Bonjour, ceci est un test de la synthèse vocale.");
+
         // Événement pour commencer la reconnaissance vocale
         speakButton.addEventListener('click', () => {
             console.log("Bouton cliqué, démarrage de la reconnaissance vocale.");
