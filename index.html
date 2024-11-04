@@ -49,22 +49,32 @@
             alert("Votre navigateur ne prend pas en charge la synthèse ou la reconnaissance vocale.");
         }
 
+        // Configuration de la reconnaissance vocale
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.lang = 'fr-FR';
         recognition.interimResults = false;
         recognition.maxAlternatives = 1;
 
+        // Attente des voix pour la synthèse vocale
+        let voices = [];
+        window.speechSynthesis.onvoiceschanged = () => {
+            voices = window.speechSynthesis.getVoices();
+        };
+
         // Fonction pour faire parler le chatbot
         function speakText(text) {
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'fr-FR';
+            utterance.voice = voices.find(voice => voice.lang === 'fr-FR') || null;
             utterance.onend = () => console.log('La parole est terminée.');
             utterance.onerror = (event) => console.error('Erreur de synthèse vocale:', event.error);
-            speechSynthesis.speak(utterance);
+            window.speechSynthesis.speak(utterance);
         }
 
         // Test de synthèse vocale au chargement de la page
-        speakText("Bonjour, ceci est un test de la synthèse vocale.");
+        window.addEventListener('load', () => {
+            speakText("Bonjour, ceci est un test de la synthèse vocale.");
+        });
 
         // Événement pour commencer la reconnaissance vocale
         speakButton.addEventListener('click', () => {
@@ -89,10 +99,11 @@
             console.log("Reconnaissance vocale arrêtée.");
         };
 
-        // Événement d'erreur de reconnaissance vocale
+        // Gestion des erreurs de reconnaissance vocale
         recognition.onerror = (event) => {
             console.error("Erreur de reconnaissance vocale :", event.error);
-            speakText(`Erreur de reconnaissance vocale : ${event.error}`);
+            speakText("Désolé, je n'ai pas compris. Pouvez-vous répéter ?");
+            recognition.stop();
         };
     </script>
 </body>
