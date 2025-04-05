@@ -40,6 +40,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: transform 0.5s ease;
         }
         
         #wave-canvas {
@@ -48,6 +49,7 @@
             position: absolute;
             top: 0;
             left: 0;
+            transition: opacity 0.3s ease;
         }
         
         .wave-glow {
@@ -64,12 +66,24 @@
                 transparent 80%
             );
             opacity: 0;
-            transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             filter: blur(15px);
         }
         
         .active .wave-glow {
             opacity: 0.8;
+            animation: pulse-glow 3s infinite alternate;
+        }
+        
+        @keyframes pulse-glow {
+            0% {
+                opacity: 0.6;
+                filter: blur(15px);
+            }
+            100% {
+                opacity: 0.9;
+                filter: blur(18px);
+            }
         }
         
         .mic-gradient {
@@ -83,6 +97,17 @@
         
         .mic-listening {
             background: linear-gradient(135deg, #0062FF, #0091FF);
+            animation: mic-pulse 2s infinite alternate;
+            box-shadow: 0 0 15px 5px rgba(0, 145, 255, 0.3);
+        }
+        
+        @keyframes mic-pulse {
+            0% {
+                box-shadow: 0 0 10px 2px rgba(0, 145, 255, 0.3);
+            }
+            100% {
+                box-shadow: 0 0 20px 5px rgba(0, 145, 255, 0.5);
+            }
         }
         
         .status-text {
@@ -247,6 +272,35 @@
             z-index: 100;
             display: none;
         }
+        
+        /* Animation for the wave bars - soft transition between heights */
+        @keyframes wave-animation {
+            0% { transform: scaleY(var(--min-scale)); }
+            100% { transform: scaleY(var(--max-scale)); }
+        }
+        
+        .wave-bar {
+            --min-scale: 0.1;
+            --max-scale: 1;
+            animation: wave-animation 0.5s ease-in-out infinite alternate;
+            background: linear-gradient(to bottom, #0091FF, #5D5CDE);
+            border-radius: 2px;
+            display: inline-block;
+            transform-origin: bottom;
+            margin: 0 2px;
+            transition: transform 0.3s ease;
+        }
+        
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .dark\:bg-darkgray {
+                background-color: #121212;
+            }
+            
+            .dark\:text-white {
+                color: #FFFFFF;
+            }
+        }
     </style>
 </head>
 
@@ -296,11 +350,12 @@
                 <div id="wave-visualizer" class="wave-visualizer">
                     <canvas id="wave-canvas"></canvas>
                     <div class="wave-glow"></div>
+                    <div id="wave-bars-container" class="h-24 flex items-end justify-center w-full absolute bottom-0 opacity-0 transition-opacity duration-500"></div>
                 </div>
                 
                 <!-- Control buttons -->
                 <div class="flex justify-center items-center gap-6 mb-20 mt-8">
-                    <button id="cancel-button" class="h-16 w-16 bg-red-500 rounded-full flex items-center justify-center focus:outline-none shadow-lg transform transition-all duration-300 ease-in-out active:scale-95 hover:bg-red-600">
+                    <button id="cancel-button" class="h-16 w-16 bg-red-500 rounded-full flex items-center justify-center focus:outline-none shadow-lg transform transition-all duration-300 ease-in-out active:scale-95 hover:bg-red-600 opacity-0 pointer-events-none transition-opacity">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -388,41 +443,72 @@
         // === SERVICE WORKER REGISTRATION ===
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                // Create an inline service worker
+                // Create an inline service worker with improved caching
                 const swCode = `
                     const CACHE_NAME = 'voicewave-cache-v1';
-                    const urlsToCache = [
+                    const STATIC_RESOURCES = [
                         './',
                         './index.html'
                     ];
 
+                    // Install event - cache static resources
                     self.addEventListener('install', (event) => {
                         event.waitUntil(
                             caches.open(CACHE_NAME)
                                 .then((cache) => {
-                                    return cache.addAll(urlsToCache);
+                                    console.log('Service Worker: Caching static files');
+                                    return cache.addAll(STATIC_RESOURCES);
                                 })
+                                .then(() => self.skipWaiting()) // Force service worker activation
                         );
                     });
 
+                    // Activate event - clean up old caches
+                    self.addEventListener('activate', (event) => {
+                        event.waitUntil(
+                            caches.keys().then((cacheNames) => {
+                                return Promise.all(
+                                    cacheNames.filter((cacheName) => {
+                                        return cacheName !== CACHE_NAME;
+                                    }).map((cacheName) => {
+                                        console.log('Service Worker: Removing old cache', cacheName);
+                                        return caches.delete(cacheName);
+                                    })
+                                );
+                            }).then(() => self.clients.claim()) // Take control of clients immediately
+                        );
+                    });
+
+                    // Fetch event - serve from cache or network
                     self.addEventListener('fetch', (event) => {
                         event.respondWith(
                             caches.match(event.request)
-                                .then((response) => {
-                                    if (response) {
-                                        return response;
+                                .then((cachedResponse) => {
+                                    // Return cached response if available
+                                    if (cachedResponse) {
+                                        return cachedResponse;
                                     }
+                                    
+                                    // Otherwise fetch from network
                                     return fetch(event.request)
-                                        .then((response) => {
-                                            if (!response || response.status !== 200 || response.type !== 'basic') {
-                                                return response;
+                                        .then((networkResponse) => {
+                                            // Don't cache non-successful responses or non-GET requests
+                                            if (!networkResponse || networkResponse.status !== 200 || event.request.method !== 'GET') {
+                                                return networkResponse;
                                             }
-                                            const responseToCache = response.clone();
+                                            
+                                            // Clone the response to cache it and return it
+                                            const responseToCache = networkResponse.clone();
                                             caches.open(CACHE_NAME)
                                                 .then((cache) => {
                                                     cache.put(event.request, responseToCache);
                                                 });
-                                            return response;
+                                                
+                                            return networkResponse;
+                                        })
+                                        .catch((error) => {
+                                            console.error('Service Worker: Fetch error', error);
+                                            // You could return a custom offline page here
                                         });
                                 })
                         );
@@ -484,15 +570,33 @@
             installPrompt.style.display = 'none';
         });
 
+        // === DARK MODE SUPPORT ===
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
         // === CONFIGURATION ===
         const config = {
             visualization: {
                 analyserFftSize: 2048,
-                smoothingTimeConstant: 0.8
+                smoothingTimeConstant: 0.8,
+                barCount: 32,           // Number of bars in the alternative visualization
+                minHeight: 5,           // Minimum height of bars (px)
+                maxHeight: 100,         // Maximum height of bars (px)
+                updateInterval: 50      // ms between updates (smoother with higher values)
             },
             messages: {
                 idle: "Appuyez pour parler",
-                listening: "Je vous écoute"
+                listening: "Je vous écoute",
+                processing: "Traitement en cours..."
             }
         };
 
@@ -504,6 +608,7 @@
             cancelButton: document.getElementById('cancel-button'),
             waveVisualizer: document.getElementById('wave-visualizer'),
             waveCanvas: document.getElementById('wave-canvas'),
+            waveBarsContainer: document.getElementById('wave-bars-container'),
             statusText: document.getElementById('status-text'),
             transcription: document.getElementById('transcription'),
             
@@ -539,9 +644,19 @@
             canvasHeight: 0,
             animationFrame: null,
             
+            // Visualization options
+            visualizationMode: 'wave', // 'wave' or 'bars'
+            
+            // Audio stream and monitoring
+            audioStream: null,
+            microphoneActive: false,
+            
             // Chat state
             currentMode: 'voice', // 'voice' or 'chat'
-            messages: [] // To store chat messages
+            messages: [], // To store chat messages
+            
+            // Animation interval
+            visualizationInterval: null
         };
         
         // === INTERFACE SETUP ===
@@ -561,7 +676,11 @@
                 
                 // Force redraw if needed
                 if (state.isListening) {
-                    drawWave();
+                    if (state.visualizationMode === 'wave') {
+                        drawWave();
+                    } else {
+                        updateBars();
+                    }
                 }
             }
             
@@ -570,6 +689,25 @@
             
             // Resize on window changes
             window.addEventListener('resize', resizeCanvas);
+            
+            // Set up bar visualization
+            initializeBarVisualization();
+        }
+        
+        // Initialize bar visualization
+        function initializeBarVisualization() {
+            const container = elements.waveBarsContainer;
+            container.innerHTML = '';
+            
+            // Create bars
+            for (let i = 0; i < config.visualization.barCount; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'wave-bar';
+                bar.style.width = '4px';
+                bar.style.height = '5px'; // Start with minimum height
+                bar.style.animationDelay = `${i * (0.8 / config.visualization.barCount)}s`;
+                container.appendChild(bar);
+            }
         }
         
         // === VOICE RECOGNITION AND AUDIO ANALYSIS ===
@@ -615,6 +753,11 @@
                 
                 // Display complete text (both final and interim)
                 elements.transcription.textContent = finalTranscript + interimTranscript;
+                
+                // Ensure the wave visualization stays active
+                if (state.isListening && !state.animationFrame) {
+                    startVisualization();
+                }
             };
             
             state.recognition.onerror = (event) => {
@@ -622,18 +765,31 @@
                 if (event.error === 'no-speech') {
                     // Just a notification, not a critical error
                     console.log("No speech detected");
-                } else {
+                    
+                    // Keep visualization active
+                    if (state.isListening && !state.animationFrame) {
+                        startVisualization();
+                    }
+                } else if (event.error === 'audio-capture' || event.error === 'network') {
+                    // These are more serious errors, might need to stop
                     stopListening();
                 }
             };
             
             state.recognition.onend = () => {
+                console.log("Recognition ended");
+                
                 // Restart if still in listening mode (important for continuous listening)
                 if (state.isListening) {
                     try {
                         state.recognition.start();
+                        console.log("Recognition restarted");
                     } catch (e) {
                         console.log("Could not restart recognition:", e);
+                        // If we fail to restart, make sure visualization stays active
+                        if (!state.animationFrame) {
+                            startVisualization();
+                        }
                     }
                 }
             };
@@ -656,6 +812,8 @@
                 
                 // Request microphone access
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                state.audioStream = stream;
+                state.microphoneActive = true;
                 
                 // Connect microphone to analyzer
                 state.microphone = state.audioContext.createMediaStreamSource(stream);
@@ -679,9 +837,55 @@
             }
         }
         
+        // Start visualization animation
+        function startVisualization() {
+            if (state.visualizationMode === 'wave') {
+                if (!state.animationFrame) {
+                    state.animationFrame = requestAnimationFrame(drawWave);
+                }
+            } else {
+                if (!state.visualizationInterval) {
+                    updateBars(); // Initial update
+                    state.visualizationInterval = setInterval(updateBars, config.visualization.updateInterval);
+                }
+            }
+            
+            // Show the active state
+            elements.waveVisualizer.classList.add('active');
+            elements.waveBarsContainer.style.opacity = '1';
+        }
+        
+        // Stop visualization animation
+        function stopVisualization() {
+            if (state.animationFrame) {
+                cancelAnimationFrame(state.animationFrame);
+                state.animationFrame = null;
+            }
+            
+            if (state.visualizationInterval) {
+                clearInterval(state.visualizationInterval);
+                state.visualizationInterval = null;
+            }
+            
+            // Remove active state classes
+            elements.waveVisualizer.classList.remove('active');
+            elements.waveBarsContainer.style.opacity = '0';
+            
+            // Clear wave canvas
+            if (state.canvasContext) {
+                state.canvasContext.clearRect(0, 0, state.canvasWidth, state.canvasHeight);
+            }
+        }
+        
         // Draw wave visualization
         function drawWave() {
-            if (!state.analyser || !state.canvasContext) return;
+            if (!state.analyser || !state.canvasContext || !state.isListening) {
+                if (state.animationFrame) {
+                    cancelAnimationFrame(state.animationFrame);
+                    state.animationFrame = null;
+                }
+                return;
+            }
             
             const ctx = state.canvasContext;
             const width = state.canvasWidth;
@@ -716,13 +920,24 @@
                 // Normalize the data (0-255) to a value between -1 and 1
                 const v = (state.dataArray[i] / 128.0) - 1;
                 
+                // Apply additional smoothing for gentler transitions
+                const amplitude = Math.min(0.7, Math.abs(v)); // Limit max amplitude
+                const smoothY = v > 0 ? amplitude : -amplitude;
+                
                 // Scale the wave amplitude
-                const y = v * (height / 5) + centerY;
+                const y = smoothY * (height / 5) + centerY;
                 
                 if (i === 0) {
                     ctx.moveTo(x, y);
                 } else {
-                    ctx.lineTo(x, y);
+                    // Use quadratic curves for smoother waves
+                    const prevX = x - sliceWidth;
+                    const prevY = i > 0 ? 
+                        ((state.dataArray[i-1] / 128.0) - 1) * (height / 5) + centerY : 
+                        centerY;
+                    
+                    const cpX = (prevX + x) / 2;
+                    ctx.quadraticCurveTo(cpX, prevY, x, y);
                 }
                 
                 x += sliceWidth;
@@ -741,49 +956,143 @@
             // Reset composite operation
             ctx.globalCompositeOperation = 'source-over';
             
-            // Continue animation
+            // Continue animation only if still listening
             if (state.isListening) {
                 state.animationFrame = requestAnimationFrame(drawWave);
+            } else {
+                if (state.animationFrame) {
+                    cancelAnimationFrame(state.animationFrame);
+                    state.animationFrame = null;
+                }
+                
+                // One last clear for good measure
+                ctx.clearRect(0, 0, width, height);
+            }
+        }
+        
+        // Update bars visualization
+        function updateBars() {
+            if (!state.analyser || !state.isListening) {
+                if (state.visualizationInterval) {
+                    clearInterval(state.visualizationInterval);
+                    state.visualizationInterval = null;
+                }
+                return;
+            }
+            
+            // Get frequency data
+            state.analyser.getByteFrequencyData(state.dataArray);
+            
+            const bars = elements.waveBarsContainer.children;
+            const barCount = bars.length;
+            
+            // Calculate step size to sample from dataArray
+            const step = Math.floor(state.dataArray.length / barCount);
+            
+            // Update each bar's height based on frequency data
+            for (let i = 0; i < barCount; i++) {
+                const dataIndex = i * step;
+                const value = state.dataArray[dataIndex];
+                
+                // Calculate height percentage (0-100)
+                const minHeight = config.visualization.minHeight;
+                const maxHeight = config.visualization.maxHeight;
+                const heightRange = maxHeight - minHeight;
+                
+                // Smooth the transition with a weighted average
+                const normValue = value / 255;
+                const height = minHeight + (normValue * heightRange);
+                
+                // Apply exponential curve for more dramatic effect on louder sounds
+                const heightWithCurve = minHeight + (Math.pow(normValue, 1.3) * heightRange);
+                
+                // Update bar style
+                bars[i].style.height = `${heightWithCurve}px`;
+                
+                // Also update custom properties for animation
+                const minScale = minHeight / maxHeight;
+                const maxScale = 0.8 + (normValue * 0.4); // Scale between 0.8 and 1.2
+                
+                bars[i].style.setProperty('--min-scale', minScale.toFixed(2));
+                bars[i].style.setProperty('--max-scale', maxScale.toFixed(2));
             }
         }
         
         // === VOICE INPUT MANAGEMENT ===
         
-        // Start voice listening
+        // Start voice listening with robust error handling
         async function startListening() {
-            // Clear previous transcript
-            elements.transcription.textContent = "";
-            
-            // First-time initialization
-            if (!state.analyser && !state.recognition) {
-                // Initialize canvas first
-                initializeCanvas();
-                
-                // Then set up audio processing
-                const recognitionReady = setupSpeechRecognition();
-                const analysisReady = await setupAudioAnalysis();
-                
-                if (!recognitionReady || !analysisReady) {
-                    alert("Impossible d'initialiser la reconnaissance vocale ou l'analyse audio");
-                    return;
-                }
-            }
-            
-            // Start voice recognition
             try {
-                if (state.recognition) {
-                    state.recognition.start();
+                // Show cancel button
+                elements.cancelButton.style.opacity = '1';
+                elements.cancelButton.style.pointerEvents = 'auto';
+                
+                // Clear previous transcript
+                elements.transcription.textContent = "";
+                
+                // First-time initialization
+                if (!state.analyser && !state.recognition) {
+                    // Initialize canvas first
+                    initializeCanvas();
+                    
+                    // Then set up audio processing
+                    const recognitionReady = setupSpeechRecognition();
+                    const analysisReady = await setupAudioAnalysis();
+                    
+                    if (!recognitionReady || !analysisReady) {
+                        alert("Impossible d'initialiser la reconnaissance vocale ou l'analyse audio");
+                        
+                        // Reset UI
+                        elements.cancelButton.style.opacity = '0';
+                        elements.cancelButton.style.pointerEvents = 'none';
+                        return;
+                    }
+                } else if (state.audioContext && state.audioContext.state === 'suspended') {
+                    // Resume audio context if suspended
+                    await state.audioContext.resume();
                 }
                 
-                // Start visualization
-                state.animationFrame = requestAnimationFrame(drawWave);
+                // Set listening state
+                state.isListening = true;
+                
+                // Start voice recognition
+                try {
+                    if (state.recognition) {
+                        state.recognition.start();
+                    }
+                } catch (error) {
+                    console.warn("Recognition already started or error:", error);
+                    
+                    // Try to stop and restart if it's already running
+                    try {
+                        state.recognition.stop();
+                        setTimeout(() => {
+                            state.recognition.start();
+                        }, 200);
+                    } catch (e) {
+                        console.error("Could not restart recognition:", e);
+                    }
+                }
+                
+                // Start visualization immediately (don't wait for recognition results)
+                startVisualization();
+                
+                // Update UI state
+                updateListeningState(true);
             } catch (error) {
-                console.error("Error starting recognition:", error);
+                console.error("Error in startListening:", error);
+                stopListening(); // Clean up if there's an error
+                alert("Une erreur s'est produite lors de l'activation du microphone.");
             }
         }
         
-        // Stop voice listening
+        // Stop voice listening with reliable cleanup
         function stopListening() {
+            // Hide cancel button
+            elements.cancelButton.style.opacity = '0';
+            elements.cancelButton.style.pointerEvents = 'none';
+            
+            // Update state
             state.isListening = false;
             
             // Stop recognition if active
@@ -795,20 +1104,14 @@
                 }
             }
             
-            // Stop animation
-            if (state.animationFrame) {
-                cancelAnimationFrame(state.animationFrame);
-                state.animationFrame = null;
-            }
-            
-            // Clear canvas with fade out effect
-            if (state.canvasContext) {
-                const ctx = state.canvasContext;
-                ctx.clearRect(0, 0, state.canvasWidth, state.canvasHeight);
-            }
+            // Stop visualization
+            stopVisualization();
             
             // Update UI
             updateListeningState(false);
+            
+            // Keep microphone active in the background to ensure next activation is quick
+            // but stop visualization
         }
         
         // Update UI based on listening state
@@ -824,8 +1127,12 @@
             } else {
                 elements.waveVisualizer.classList.remove('active');
                 
-                // Clear transcription
-                elements.transcription.textContent = "";
+                // Clear transcription with delay (for better UX)
+                setTimeout(() => {
+                    if (!state.isListening) {
+                        elements.transcription.textContent = "";
+                    }
+                }, 500);
             }
             
             // Update button appearance
@@ -1000,6 +1307,47 @@
                     elements.sendMessage.classList.add('scale-110');
                 } else {
                     elements.sendMessage.classList.remove('scale-110');
+                }
+            });
+            
+            // Prevent app from going to sleep when active
+            if ('wakeLock' in navigator) {
+                // Try to acquire a wakelock when the user interacts with the mic
+                elements.micButton.addEventListener('click', async () => {
+                    if (state.isListening) {
+                        try {
+                            const wakeLock = await navigator.wakeLock.request('screen');
+                            
+                            // Release the wakelock when the mic is stopped
+                            wakeLock.addEventListener('release', () => {
+                                console.log('Wake Lock released');
+                            });
+                            
+                            // Also release it when the user leaves the page
+                            document.addEventListener('visibilitychange', () => {
+                                if (document.visibilityState === 'hidden' && wakeLock) {
+                                    wakeLock.release();
+                                }
+                            });
+                        } catch (err) {
+                            console.log(`Wake Lock error: ${err.name}, ${err.message}`);
+                        }
+                    }
+                });
+            }
+            
+            // Make sure the visualization works after the app returns from background
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible' && state.isListening) {
+                    // Restart visualization if needed
+                    if (!state.animationFrame && state.visualizationMode === 'wave') {
+                        startVisualization();
+                    }
+                    
+                    // Resume the audio context if it got suspended
+                    if (state.audioContext && state.audioContext.state === 'suspended') {
+                        state.audioContext.resume();
+                    }
                 }
             });
         }
