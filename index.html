@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VocalWave</title>
+    <title>Application de Chat Vocal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -11,10 +11,7 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#2E6FF2',
-                        accent: '#7C4DFF',
-                        glow: '#3A86FF',
-                        darkbg: '#0A0A15',
+                        primary: '#5D5CDE',
                     },
                 }
             }
@@ -40,44 +37,33 @@
             width: 100%;
             height: 100%;
             display: flex;
-            align-items: flex-end;
+            align-items: center;
             justify-content: center;
-            padding: 0 20px;
         }
         
-        .bar {
-            width: 6px;
-            border-radius: 8px;
-            margin: 0 3px;
-            background: linear-gradient(to top, 
-                rgba(46, 111, 242, 0.9), 
-                rgba(59, 130, 246, 0.8) 40%, 
-                rgba(124, 77, 255, 0.8) 70%, 
-                rgba(139, 92, 246, 0.6));
-            transition: height 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-            transform-origin: bottom center;
-            box-shadow: 0 0 12px rgba(58, 134, 255, 0.5);
-            opacity: 0.6;
+        canvas.waveform {
+            width: 100%;
+            height: 120px;
+            position: absolute;
+            bottom: 30px;
         }
         
-        .active .bar {
-            opacity: 1;
-            animation: gentleColorshift 8s infinite alternate ease-in-out;
+        .wave-bg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(0deg, 
+                rgba(59, 130, 246, 0.2) 0%, 
+                rgba(16, 185, 129, 0) 100%);
+            transform: scaleY(0);
+            transform-origin: bottom;
+            transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
-        @keyframes gentleColorshift {
-            0% {
-                filter: hue-rotate(0deg) brightness(1.1);
-                box-shadow: 0 0 15px rgba(58, 134, 255, 0.6);
-            }
-            50% {
-                filter: hue-rotate(30deg) brightness(1.3);
-                box-shadow: 0 0 20px rgba(124, 77, 255, 0.7);
-            }
-            100% {
-                filter: hue-rotate(0deg) brightness(1.1);
-                box-shadow: 0 0 15px rgba(58, 134, 255, 0.6);
-            }
+        .active .wave-bg {
+            transform: scaleY(1);
         }
         
         .glow {
@@ -88,98 +74,51 @@
             height: 180px;
             background: radial-gradient(
                 ellipse at center bottom, 
-                rgba(58, 134, 255, 0.4), 
-                rgba(124, 77, 255, 0.3) 40%, 
-                rgba(46, 111, 242, 0.2) 60%, 
+                rgba(66, 153, 225, 0.4), 
+                rgba(139, 92, 246, 0.3) 40%, 
+                rgba(59, 130, 246, 0.2) 60%, 
                 transparent 80%
             );
             opacity: 0;
             transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
-            filter: blur(20px);
+            filter: blur(15px);
         }
         
         .active .glow {
             opacity: 1;
         }
         
-        .wave-bg {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 120px;
-            background: linear-gradient(0deg, 
-                rgba(58, 134, 255, 0.2) 0%, 
-                rgba(124, 77, 255, 0.1) 60%,
-                rgba(0, 0, 0, 0) 100%);
-            transform: scaleY(0);
-            transform-origin: bottom;
-            transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        
-        .active .wave-bg {
-            transform: scaleY(1);
+        @keyframes gentleColorshift {
+            0% {
+                filter: hue-rotate(0deg) brightness(1);
+            }
+            50% {
+                filter: hue-rotate(30deg) brightness(1.1);
+            }
+            100% {
+                filter: hue-rotate(0deg) brightness(1);
+            }
         }
         
         .mic-gradient {
-            background: linear-gradient(135deg, #2E6FF2, #7C4DFF);
-            box-shadow: 0 0 20px rgba(46, 111, 242, 0.5);
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
             transition: all 0.5s ease;
         }
         
         .mic-gradient:hover {
-            background: linear-gradient(135deg, #3A86FF, #9D70FF);
-            box-shadow: 0 0 25px rgba(58, 134, 255, 0.7);
+            background: linear-gradient(135deg, #4338CA, #6D28D9);
         }
         
         .mic-listening {
-            background: linear-gradient(135deg, #3A86FF, #7C4DFF);
-            box-shadow: 0 0 30px rgba(124, 77, 255, 0.7);
-            animation: pulse 2s infinite;
+            background: linear-gradient(135deg, #EF4444, #F97316);
         }
         
         .status-text {
             transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            text-shadow: 0 0 10px rgba(58, 134, 255, 0.5);
         }
         
         .transcription {
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        
-        /* Wave animations */
-        .wave-animation {
-            position: absolute;
-            bottom: -10px;
-            left: 0;
-            width: 200%;
-            height: 60px;
-            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" fill="%233A86FF" /></svg>');
-            background-size: 1200px 100%;
-            opacity: 0;
-            transition: opacity 1s ease;
-        }
-        
-        .active .wave-animation {
-            opacity: 0.6;
-            animation: wave 12s linear infinite;
-        }
-        
-        .wave-animation-2 {
-            height: 40px;
-            bottom: -15px;
-            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" fill="%237C4DFF" /></svg>');
-            animation-delay: -5s;
-            animation-duration: 15s;
-        }
-        
-        @keyframes wave {
-            0% {
-                transform: translateX(0);
-            }
-            100% {
-                transform: translateX(-600px);
-            }
         }
         
         .dark {
@@ -196,7 +135,7 @@
         .chat-messages {
             overflow-y: auto;
             scrollbar-width: thin;
-            scrollbar-color: rgba(58, 134, 255, 0.5) transparent;
+            scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
         }
         
         .chat-messages::-webkit-scrollbar {
@@ -208,7 +147,7 @@
         }
         
         .chat-messages::-webkit-scrollbar-thumb {
-            background-color: rgba(58, 134, 255, 0.5);
+            background-color: rgba(156, 163, 175, 0.5);
             border-radius: 20px;
         }
         
@@ -220,38 +159,45 @@
         }
         
         .user-message {
-            background: linear-gradient(135deg, #2E6FF2, #3A86FF);
+            background-color: #5D5CDE;
             color: white;
             border-top-right-radius: 4px;
             align-self: flex-end;
-            box-shadow: 0 2px 10px rgba(46, 111, 242, 0.3);
         }
         
         .system-message {
-            background-color: rgba(124, 77, 255, 0.1);
-            color: #F3F4F6;
+            background-color: #F3F4F6;
+            color: #374151;
             border-top-left-radius: 4px;
             align-self: flex-start;
-            border: 1px solid rgba(124, 77, 255, 0.2);
-            box-shadow: 0 2px 10px rgba(124, 77, 255, 0.1);
+        }
+        
+        .dark .system-message {
+            background-color: #374151;
+            color: #F3F4F6;
         }
 
         /* Enhanced chat input styles */
         .chat-input-container {
-            background-color: rgba(124, 77, 255, 0.1);
+            background-color: #F3F4F6;
             border-radius: 28px;
             padding: 8px 8px 8px 20px;
             display: flex;
             align-items: center;
-            box-shadow: 0 2px 15px rgba(46, 111, 242, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
             margin: 0 4px;
-            border: 1px solid rgba(124, 77, 255, 0.2);
+            border: 2px solid transparent;
+        }
+        
+        .dark .chat-input-container {
+            background-color: #374151;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
         
         .chat-input-container:focus-within {
-            border-color: #3A86FF;
-            box-shadow: 0 2px 20px rgba(58, 134, 255, 0.2);
+            border-color: #5D5CDE;
+            box-shadow: 0 2px 15px rgba(93, 92, 222, 0.15);
         }
         
         .chat-input {
@@ -260,12 +206,16 @@
             border: none;
             outline: none;
             font-size: 16px;
-            color: #F3F4F6;
+            color: #374151;
             padding: 8px 0;
         }
         
+        .dark .chat-input {
+            color: #F3F4F6;
+        }
+        
         .chat-send-button {
-            background: linear-gradient(135deg, #2E6FF2, #7C4DFF);
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
             color: white;
             border-radius: 50%;
             width: 42px;
@@ -276,13 +226,11 @@
             cursor: pointer;
             transform: scale(1);
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 0 10px rgba(46, 111, 242, 0.4);
         }
         
         .chat-send-button:hover {
             transform: scale(1.05);
-            background: linear-gradient(135deg, #3A86FF, #9D70FF);
-            box-shadow: 0 0 15px rgba(58, 134, 255, 0.6);
+            background: linear-gradient(135deg, #4338CA, #6D28D9);
         }
         
         .chat-send-button:active {
@@ -300,13 +248,13 @@
         
         @keyframes pulse {
             0% {
-                box-shadow: 0 0 0 0 rgba(58, 134, 255, 0.4);
+                box-shadow: 0 0 0 0 rgba(93, 92, 222, 0.4);
             }
             70% {
-                box-shadow: 0 0 0 15px rgba(58, 134, 255, 0);
+                box-shadow: 0 0 0 10px rgba(93, 92, 222, 0);
             }
             100% {
-                box-shadow: 0 0 0 0 rgba(58, 134, 255, 0);
+                box-shadow: 0 0 0 0 rgba(93, 92, 222, 0);
             }
         }
 
@@ -328,37 +276,26 @@
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(-100%); opacity: 0; }
         }
-        
-        /* Floating effect */
-        .floating {
-            animation: floating 3s ease-in-out infinite;
-        }
-        
-        @keyframes floating {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-            100% { transform: translateY(0px); }
-        }
     </style>
 </head>
 
-<body class="dark bg-darkbg text-white transition-colors duration-500">
+<body class="dark:bg-black bg-white transition-colors duration-500">
     <div class="min-h-screen flex flex-col">
         <!-- Header -->
-        <header class="fixed top-0 inset-x-0 py-4 px-4 flex items-center justify-between bg-darkbg/80 backdrop-blur-md z-20 border-b border-glow/20">
+        <header class="fixed top-0 inset-x-0 py-4 px-4 flex items-center justify-between dark:bg-black/80 bg-white/80 backdrop-blur-md z-20">
             <div class="flex items-center">
-                <div class="relative mr-2 h-6 w-6 floating">
-                    <div class="absolute inset-0 rounded-full bg-glow opacity-25"></div>
-                    <div class="relative rounded-full h-6 w-6 bg-gradient-to-r from-primary to-accent flex items-center justify-center">
+                <div class="relative mr-2 h-6 w-6">
+                    <div class="absolute inset-0 rounded-full bg-primary opacity-25"></div>
+                    <div class="relative rounded-full h-6 w-6 bg-primary flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                         </svg>
                     </div>
                 </div>
-                <h1 class="text-xl font-bold text-white" id="app-title">VocalWave</h1>
+                <h1 class="text-xl font-bold dark:text-white text-black" id="app-title">Chat Vocal</h1>
             </div>
             
-            <button id="mode-toggle" class="h-10 w-10 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center focus:outline-none shadow-lg shadow-glow/30 transform transition-all duration-300 ease-in-out active:scale-95 hover:shadow-glow/50">
+            <button id="mode-toggle" class="h-10 w-10 bg-primary rounded-full flex items-center justify-center focus:outline-none shadow-md transform transition-all duration-300 ease-in-out active:scale-95 hover:bg-opacity-90">
                 <!-- Chat icon (shown in voice mode) -->
                 <svg id="chat-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -375,33 +312,33 @@
             <!-- Text display area -->
             <div class="flex-1 flex flex-col items-center justify-center px-6">
                 <!-- Current status -->
-                <div id="status-text" class="text-xl font-medium text-white text-center mb-4 status-text">
+                <div id="status-text" class="text-xl font-medium dark:text-white text-black text-center mb-4 status-text">
                     Appuyez pour parler
                 </div>
                 
                 <!-- Real-time transcription - displays what's being heard -->
-                <div id="transcription" class="text-2xl text-blue-100 text-center max-w-lg transcription mt-6 mb-6 min-h-[100px]"></div>
+                <div id="transcription" class="text-2xl dark:text-gray-200 text-gray-800 text-center max-w-lg transcription mt-6 mb-6 min-h-[100px]"></div>
             </div>
 
             <!-- Audio Visualizer -->
             <div class="mt-auto">
                 <div id="audio-visualizer" class="audio-visualizer">
                     <div class="wave-bg"></div>
-                    <div class="wave-animation"></div>
-                    <div class="wave-animation wave-animation-2"></div>
-                    <div class="visualizer-container" id="visualizer-bars"></div>
+                    <div class="visualizer-container">
+                        <canvas id="waveform" class="waveform"></canvas>
+                    </div>
                     <div class="glow"></div>
                 </div>
                 
                 <!-- Control buttons -->
                 <div class="flex justify-center items-center gap-6 mb-20 mt-8">
-                    <button id="cancel-button" class="h-16 w-16 bg-red-500 rounded-full flex items-center justify-center focus:outline-none shadow-lg shadow-red-500/30 transform transition-all duration-300 ease-in-out active:scale-95 hover:bg-red-600 hover:shadow-red-500/50">
+                    <button id="cancel-button" class="h-16 w-16 bg-red-500 rounded-full flex items-center justify-center focus:outline-none shadow-lg transform transition-all duration-300 ease-in-out active:scale-95 hover:bg-red-600">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                     
-                    <button id="mic-button" class="h-20 w-20 mic-gradient rounded-full flex items-center justify-center focus:outline-none shadow-lg transform transition-all duration-300 ease-in-out active:scale-95 floating">
+                    <button id="mic-button" class="h-20 w-20 mic-gradient rounded-full flex items-center justify-center focus:outline-none shadow-lg transform transition-all duration-300 ease-in-out active:scale-95">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                         </svg>
@@ -415,17 +352,17 @@
             <!-- Chat messages area -->
             <div class="chat-messages flex-1 flex flex-col px-4 py-2 overflow-y-auto mb-2">
                 <div class="message system-message">
-                    Bienvenue dans VocalWave ! Comment puis-je vous aider ?
+                    Bienvenue dans le chat ! Comment puis-je vous aider ?
                 </div>
                 <!-- Messages will be added here dynamically -->
             </div>
             
             <!-- Chat input area - positioned at bottom with space -->
-            <div class="px-4 pt-2 pb-8 shadow-md bg-darkbg/90 backdrop-blur-sm sticky bottom-0 z-10 mt-auto">
+            <div class="px-4 pt-2 pb-8 shadow-md bg-white/90 dark:bg-black/90 backdrop-blur-sm sticky bottom-0 z-10 mt-auto">
                 <div id="chat-input-container" class="chat-input-container">
                     <input 
                         id="message-input" 
-                        class="chat-input" 
+                        class="chat-input dark:text-white" 
                         placeholder="Écrivez votre message..." 
                         type="text"
                     />
@@ -443,29 +380,42 @@
         // === CONFIGURATION ===
         const config = {
             visualization: {
-                barCount: 45,
-                minBarHeight: 3,
-                maxBarHeight: 120,
-                analyserFftSize: 256,
-                smoothingTimeConstant: 0.85
+                waveColor: '#5D5CDE',
+                analyserFftSize: 1024, // Augmenté pour plus de détails
+                smoothingTimeConstant: 0.8
             },
             messages: {
                 idle: "Appuyez pour parler",
                 listening: "Je vous écoute"
+            },
+            speechSynthesis: {
+                lang: 'fr-FR',
+                volume: 1,
+                rate: 1,
+                pitch: 1
             }
         };
 
         // === INITIALISATIONS ===
         
-        // Force dark mode by default to match the image aesthetic
-        document.documentElement.classList.add('dark');
+        // Dark mode detection
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
         
         // DOM elements
         const elements = {
             micButton: document.getElementById('mic-button'),
             cancelButton: document.getElementById('cancel-button'),
             audioVisualizer: document.getElementById('audio-visualizer'),
-            visualizerBars: document.getElementById('visualizer-bars'),
+            waveform: document.getElementById('waveform'),
             statusText: document.getElementById('status-text'),
             transcription: document.getElementById('transcription'),
             
@@ -489,44 +439,49 @@
         // State variables
         const state = {
             isListening: false,
-            barElements: [],
             recognition: null,
             audioContext: null,
             analyser: null,
             microphone: null,
             dataArray: null,
+            canvasContext: null,
+            animationFrame: null,
+            lastTranscript: '', // Pour stocker la dernière transcription
             
             // Chat state
             currentMode: 'voice', // 'voice' or 'chat'
             messages: [] // To store chat messages
         };
         
-        // === INTERFACE SETUP ===
+        // === CANVAS SETUP ===
         
-        // Create audio visualizer bars with varying heights for a wave effect
-        function createVisualizerBars() {
-            const { barCount } = config.visualization;
+        // Configure canvas for waveform visualization
+        function setupCanvas() {
+            const canvas = elements.waveform;
+            const dpr = window.devicePixelRatio || 1;
             
-            for (let i = 0; i < barCount; i++) {
-                const bar = document.createElement('div');
-                bar.className = 'bar';
-                
-                // Calculate a sine wave pattern for initial heights
-                const baseHeight = Math.sin((i / barCount) * Math.PI) * 20;
-                const initialHeight = Math.max(config.visualization.minBarHeight, baseHeight);
-                bar.style.height = `${initialHeight}px`;
-                
-                // Slight width variation
-                const randomWidth = 4 + Math.random() * 2;
-                bar.style.width = `${randomWidth}px`;
-                bar.style.borderRadius = `${randomWidth}px`;
-                
-                // Add slight delay to each bar's animation
-                bar.style.transitionDelay = `${i * 10}ms`;
-                
-                elements.visualizerBars.appendChild(bar);
-                state.barElements.push(bar);
-            }
+            // Set canvas dimensions based on display size
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            
+            // Get canvas context and configure it
+            state.canvasContext = canvas.getContext('2d');
+            state.canvasContext.scale(dpr, dpr);
+            
+            // Set line style for waveform
+            state.canvasContext.lineWidth = 2;
+            state.canvasContext.strokeStyle = config.visualization.waveColor;
+            
+            // Add resize event listener to update canvas dimensions
+            window.addEventListener('resize', () => {
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                state.canvasContext.scale(dpr, dpr);
+                state.canvasContext.lineWidth = 2;
+                state.canvasContext.strokeStyle = config.visualization.waveColor;
+            });
         }
         
         // === VOICE RECOGNITION AND AUDIO ANALYSIS ===
@@ -565,6 +520,8 @@
                     
                     if (event.results[i].isFinal) {
                         finalTranscript += transcript;
+                        // Store the final transcript for speech synthesis
+                        state.lastTranscript = finalTranscript;
                     } else {
                         interimTranscript += transcript;
                     }
@@ -618,7 +575,7 @@
                 state.microphone = state.audioContext.createMediaStreamSource(stream);
                 state.analyser = state.audioContext.createAnalyser();
                 
-                // Configure analyzer for smoother visualization
+                // Configure analyzer
                 state.analyser.fftSize = config.visualization.analyserFftSize;
                 state.analyser.smoothingTimeConstant = config.visualization.smoothingTimeConstant;
                 
@@ -629,8 +586,11 @@
                 // Connect nodes
                 state.microphone.connect(state.analyser);
                 
+                // Set up canvas for visualization
+                setupCanvas();
+                
                 // Start real-time analysis
-                visualizeAudio();
+                startWaveformVisualization();
                 
                 return true;
             } catch (error) {
@@ -639,64 +599,96 @@
             }
         }
         
-        // Real-time audio visualization with wave-like movement
-        function visualizeAudio() {
-            if (!state.analyser) return;
+        // Draw waveform visualization
+        function startWaveformVisualization() {
+            // Cancel any existing animation frame
+            if (state.animationFrame) {
+                cancelAnimationFrame(state.animationFrame);
+            }
             
-            function updateVisualization() {
-                // Get frequency data
-                state.analyser.getByteFrequencyData(state.dataArray);
-                
-                // Update bars
-                const bufferLength = state.analyser.frequencyBinCount;
-                const barCount = state.barElements.length;
-                
-                // Wave animation even when not listening
-                if (!state.isListening) {
-                    const time = Date.now() / 1000;
-                    for (let i = 0; i < barCount; i++) {
-                        // Create a gentle wave pattern
-                        const waveHeight = Math.sin((i / barCount * Math.PI * 4) + time) * 10 + 15;
-                        const height = Math.max(config.visualization.minBarHeight, waveHeight);
-                        state.barElements[i].style.height = `${height}px`;
-                    }
-                } 
-                // More dynamic, audio-responsive visualization when listening
-                else if (state.isListening && elements.audioVisualizer.classList.contains('active')) {
-                    // Map frequency data to bars
-                    for (let i = 0; i < barCount; i++) {
-                        // Calculate which part of the frequency spectrum corresponds to this bar
-                        const dataIndex = Math.floor(i * bufferLength / barCount);
+            // Function to draw each frame
+            function drawWaveform() {
+                // Only draw if in listening mode
+                if (state.isListening && elements.audioVisualizer.classList.contains('active')) {
+                    // Get time domain data
+                    state.analyser.getByteTimeDomainData(state.dataArray);
+                    
+                    // Get canvas dimensions
+                    const canvas = elements.waveform;
+                    const width = canvas.width / window.devicePixelRatio;
+                    const height = canvas.height / window.devicePixelRatio;
+                    
+                    // Clear previous frame
+                    state.canvasContext.clearRect(0, 0, width, height);
+                    
+                    // Set line style
+                    state.canvasContext.beginPath();
+                    
+                    // Set line properties
+                    const sliceWidth = width / state.dataArray.length;
+                    let x = 0;
+                    
+                    // Draw waveform
+                    for (let i = 0; i < state.dataArray.length; i++) {
+                        const value = state.dataArray[i] / 128.0;
+                        const y = (value * height / 2);
                         
-                        // Get value (0-255)
-                        let value = state.dataArray[dataIndex];
-                        
-                        // Amplify voice frequencies (middle range)
-                        if (dataIndex > bufferLength * 0.1 && dataIndex < bufferLength * 0.8) {
-                            value = value * 1.3;
+                        if (i === 0) {
+                            state.canvasContext.moveTo(x, y);
+                        } else {
+                            state.canvasContext.lineTo(x, y);
                         }
                         
-                        // Apply wave-like pattern on top of audio data
-                        const time = Date.now() / 1000;
-                        const waveFactor = Math.sin((i / barCount * Math.PI * 2) + time) * 5;
-                        
-                        // Convert to bar height (non-linear scale for better visualization)
-                        const height = Math.max(
-                            config.visualization.minBarHeight,
-                            Math.pow(value / 255, 1.2) * config.visualization.maxBarHeight + waveFactor
-                        );
-                        
-                        // Apply height
-                        state.barElements[i].style.height = `${height}px`;
+                        x += sliceWidth;
                     }
+                    
+                    // Complete path and stroke
+                    state.canvasContext.lineTo(width, height / 2);
+                    state.canvasContext.stroke();
+                } else if (!state.isListening) {
+                    // Draw a flat line when not listening
+                    const canvas = elements.waveform;
+                    const width = canvas.width / window.devicePixelRatio;
+                    const height = canvas.height / window.devicePixelRatio;
+                    
+                    state.canvasContext.clearRect(0, 0, width, height);
+                    state.canvasContext.beginPath();
+                    state.canvasContext.moveTo(0, height / 2);
+                    state.canvasContext.lineTo(width, height / 2);
+                    state.canvasContext.stroke();
                 }
                 
                 // Continue animation loop
-                requestAnimationFrame(updateVisualization);
+                state.animationFrame = requestAnimationFrame(drawWaveform);
             }
             
             // Start animation loop
-            updateVisualization();
+            state.animationFrame = requestAnimationFrame(drawWaveform);
+        }
+        
+        // === SPEECH SYNTHESIS ===
+        
+        // Function to speak the transcribed text
+        function speakText(text) {
+            // Check if speech synthesis is supported
+            if ('speechSynthesis' in window) {
+                // Create new speech utterance
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                // Configure speech synthesis
+                utterance.lang = config.speechSynthesis.lang;
+                utterance.volume = config.speechSynthesis.volume;
+                utterance.rate = config.speechSynthesis.rate;
+                utterance.pitch = config.speechSynthesis.pitch;
+                
+                // Speak the text
+                window.speechSynthesis.speak(utterance);
+                
+                return true;
+            } else {
+                console.warn("Speech synthesis is not supported in this browser");
+                return false;
+            }
         }
         
         // === VOICE INPUT MANAGEMENT ===
@@ -705,6 +697,7 @@
         async function startListening() {
             // Clear previous transcript
             elements.transcription.textContent = "";
+            state.lastTranscript = "";
             
             // First-time initialization
             if (!state.analyser && !state.recognition) {
@@ -742,6 +735,22 @@
             
             // Update UI
             updateListeningState(false);
+            
+            // Speak the transcribed text if there's something to repeat
+            if (state.lastTranscript && state.lastTranscript.trim() !== '') {
+                // Add a small delay before speaking to make it feel more natural
+                setTimeout(() => {
+                    speakText(state.lastTranscript);
+                }, 500);
+                
+                // Add to chat as a message
+                addMessage(state.lastTranscript, true);
+                
+                // Add response message after speech synthesis completes
+                setTimeout(() => {
+                    addMessage(`J'ai entendu: "${state.lastTranscript}"`, false);
+                }, 1000);
+            }
         }
         
         // Update UI based on listening state
@@ -754,17 +763,8 @@
             // Update visualizer
             if (isListening) {
                 elements.audioVisualizer.classList.add('active');
-                // Temporarily stop floating animation on mic button when listening
-                elements.micButton.classList.remove('floating');
             } else {
                 elements.audioVisualizer.classList.remove('active');
-                // Resume floating animation
-                elements.micButton.classList.add('floating');
-                
-                // Clear transcription after a short delay
-                setTimeout(() => {
-                    elements.transcription.textContent = "";
-                }, 1500);
             }
             
             // Update button appearance
@@ -788,7 +788,7 @@
             
             // Update title and toggle button icons
             if (mode === 'voice') {
-                elements.appTitle.textContent = 'VocalWave';
+                elements.appTitle.textContent = 'Chat Vocal';
                 elements.chatIcon.classList.remove('hidden');
                 elements.micIcon.classList.add('hidden');
                 
@@ -809,7 +809,7 @@
                     }, 400);
                 }, 400);
             } else {
-                elements.appTitle.textContent = 'TextWave';
+                elements.appTitle.textContent = 'Chat Écrit';
                 elements.chatIcon.classList.add('hidden');
                 elements.micIcon.classList.remove('hidden');
                 
@@ -889,7 +889,8 @@
         
         // Initialize the application
         function initializeApp() {
-            createVisualizerBars();
+            // Initialize UI components
+            setupCanvas();
             
             // Voice button events
             elements.micButton.addEventListener('click', () => {
@@ -918,11 +919,11 @@
             
             // Dynamic input effects
             elements.messageInput.addEventListener('focus', () => {
-                elements.chatInputContainer.classList.add('shadow-glow/30');
+                elements.chatInputContainer.classList.add('shadow-lg');
             });
             
             elements.messageInput.addEventListener('blur', () => {
-                elements.chatInputContainer.classList.remove('shadow-glow/30');
+                elements.chatInputContainer.classList.remove('shadow-lg');
             });
             
             // Send message on Enter key
