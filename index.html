@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Application de chat vocal avec visualisation d'onde sonore">
-    <meta name="theme-color" content="#121212">
+    <meta name="theme-color" content="#000000">
     <title>VoiceWave Chat</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,8 +14,8 @@
                 extend: {
                     colors: {
                         primary: '#4F46E5',
-                        dark: '#121212',
-                        darkgray: '#1A1A1A',
+                        dark: '#000000',
+                        darkgray: '#121212',
                         darklight: '#222222',
                         accent: '#005AE2',
                         glow: '#0082E6'
@@ -29,95 +29,60 @@
         body {
             touch-action: manipulation;
             overflow: hidden;
-            background-color: #121212;
+            background-color: #000000;
             color: #FFFFFF;
         }
         
+        /* Visualization container */
         .wave-visualizer {
             position: relative;
-            height: 220px;
+            height: 180px;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.5s ease;
         }
         
-        /* Wave container */
-        .ocean {
-            height: 120px;
-            width: 100%;
+        /* Linear wave visualization */
+        .linear-wave {
             position: absolute;
-            bottom: 0;
+            bottom: 55px;
             left: 0;
-            right: 0;
-            overflow: hidden;
+            width: 100%;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        .wave {
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23333644" fill-opacity="1" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
-            position: absolute;
-            width: 200%;
-            height: 100%;
-            animation: wave 15s linear infinite;
-            transform: translate3d(0, 0, 0);
-            transition: all 0.8s ease;
-        }
-        
-        .wave:nth-of-type(2) {
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23224488" fill-opacity="0.7" d="M0,64L48,80C96,96,192,128,288,128C384,128,480,96,576,122.7C672,149,768,235,864,266.7C960,299,1056,277,1152,229.3C1248,181,1344,107,1392,69.3L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
-            animation: wave 12s linear infinite;
+        .wave-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #0082E6;
+            margin: 0 6px;
             opacity: 0.6;
+            transition: transform 0.2s ease;
         }
         
-        .wave:nth-of-type(3) {
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%233C4789" fill-opacity="0.4" d="M0,256L48,261.3C96,267,192,277,288,266.7C384,256,480,224,576,213.3C672,203,768,213,864,208C960,203,1056,181,1152,186.7C1248,192,1344,224,1392,240L1440,256L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
-            animation: wave 10s linear infinite;
-            opacity: 0.4;
+        .wave-dot.active {
+            background-color: #4285F4;
+            box-shadow: 0 0 8px rgba(66, 133, 244, 0.8);
         }
         
-        @keyframes wave {
-            0% {transform: translateX(0);}
-            50% {transform: translateX(-25%);}
-            100% {transform: translateX(-50%);}
-        }
-        
-        .wave-active .wave {
-            animation-duration: calc(15s / var(--intensity, 1));
-            height: calc(100% + (35px * var(--intensity, 0)));
-        }
-        
-        .wave-active .wave:nth-of-type(2) {
-            animation-duration: calc(12s / var(--intensity, 1));
-            height: calc(100% + (25px * var(--intensity, 0)));
-        }
-        
-        .wave-active .wave:nth-of-type(3) {
-            animation-duration: calc(10s / var(--intensity, 1));
-            height: calc(100% + (15px * var(--intensity, 0)));
-        }
-        
-        .glow-overlay {
+        /* Glow effect under the wave */
+        .glow-line {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 0;
-            background: radial-gradient(
-                ellipse at center, 
-                rgba(0, 90, 226, 0.3), 
-                rgba(79, 70, 229, 0.2) 40%, 
-                rgba(28, 84, 187, 0.1) 60%, 
-                transparent 80%
-            );
-            opacity: 0.3;
-            filter: blur(15px);
-            transition: height 0.8s ease, opacity 0.8s ease;
-        }
-        
-        .wave-active .glow-overlay {
-            height: 120px;
-            opacity: calc(0.3 + (0.4 * var(--intensity, 0)));
+            bottom: 54px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                rgba(0,130,230,0) 0%, 
+                rgba(66,133,244,0.7) 50%, 
+                rgba(0,130,230,0) 100%);
+            box-shadow: 0 0 12px rgba(66, 133, 244, 0.8);
         }
         
         .mic-gradient {
@@ -307,10 +272,23 @@
             display: none;
         }
         
+        /* Control buttons */
+        .control-buttons {
+            position: fixed;
+            bottom: 100px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 60px;
+            z-index: 10;
+        }
+        
         /* Dark mode support */
         @media (prefers-color-scheme: dark) {
             .dark\:bg-darkgray {
-                background-color: #1A1A1A;
+                background-color: #000000;
             }
             
             .dark\:text-white {
@@ -325,27 +303,22 @@
         <!-- Header -->
         <header class="fixed top-0 inset-x-0 py-4 px-4 flex items-center justify-between bg-dark/90 backdrop-blur-md z-20">
             <div class="flex items-center">
-                <div class="relative mr-2 h-6 w-6">
-                    <div class="absolute inset-0 rounded-full bg-primary opacity-25"></div>
-                    <div class="relative rounded-full h-6 w-6 bg-primary flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                        </svg>
-                    </div>
+                <div class="relative mr-2 h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>
                 </div>
                 <h1 class="text-xl font-bold text-white" id="app-title">VoiceWave Chat</h1>
             </div>
             
-            <button id="mode-toggle" class="h-10 w-10 bg-primary rounded-full flex items-center justify-center focus:outline-none shadow-md transform transition-all duration-300 ease-in-out active:scale-95 hover:bg-opacity-90">
-                <!-- Chat icon (shown in voice mode) -->
-                <svg id="chat-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="relative h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center">
+                <svg id="chat-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                 </svg>
-                <!-- Mic icon (shown in chat mode) -->
-                <svg id="mic-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg id="mic-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                 </svg>
-            </button>
+            </div>
         </header>
 
         <!-- Voice interface -->
@@ -362,31 +335,29 @@
             </div>
 
             <!-- Audio Visualizer -->
-            <div class="mt-auto">
+            <div class="mt-auto relative">
                 <div id="wave-visualizer" class="wave-visualizer">
-                    <!-- Wave Animation Container -->
-                    <div class="ocean">
-                        <div class="wave"></div>
-                        <div class="wave"></div>
-                        <div class="wave"></div>
-                        <div class="glow-overlay"></div>
+                    <!-- Linear wave visualization -->
+                    <div class="glow-line"></div>
+                    <div id="linear-wave" class="linear-wave">
+                        <!-- Wave dots will be added here dynamically -->
                     </div>
                 </div>
+            </div>
+            
+            <!-- Control buttons -->
+            <div class="control-buttons">
+                <button id="cancel-button" class="h-16 w-16 bg-red-500 rounded-full flex items-center justify-center focus:outline-none shadow-lg transform transition-all duration-300 ease-in-out active:scale-95 hover:bg-red-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
                 
-                <!-- Control buttons -->
-                <div class="flex justify-center items-center gap-6 mb-20 mt-8">
-                    <button id="cancel-button" class="h-16 w-16 bg-red-500 rounded-full flex items-center justify-center focus:outline-none shadow-lg transform transition-all duration-300 ease-in-out active:scale-95 hover:bg-red-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                    
-                    <button id="mic-button" class="h-20 w-20 mic-gradient rounded-full flex items-center justify-center focus:outline-none shadow-lg transform transition-all duration-300 ease-in-out active:scale-95">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                        </svg>
-                    </button>
-                </div>
+                <button id="mic-button" class="h-20 w-20 mic-gradient rounded-full flex items-center justify-center focus:outline-none shadow-lg transform transition-all duration-300 ease-in-out active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>
+                </button>
             </div>
         </main>
 
@@ -533,8 +504,8 @@
             "description": "Application de chat vocal avec visualisation d'ondes sonores",
             "start_url": "/",
             "display": "standalone",
-            "background_color": "#121212",
-            "theme_color": "#121212",
+            "background_color": "#000000",
+            "theme_color": "#000000",
             "orientation": "portrait",
             "categories": ["productivity", "communication"],
             "icons": [
@@ -550,31 +521,7 @@
                     "type": "image/svg+xml",
                     "purpose": "maskable"
                 }
-            ],
-            "shortcuts": [
-                {
-                    "name": "Voice Mode",
-                    "short_name": "Voice",
-                    "description": "Démarrer en mode vocal",
-                    "url": "/?mode=voice"
-                },
-                {
-                    "name": "Chat Mode",
-                    "short_name": "Chat",
-                    "description": "Démarrer en mode chat",
-                    "url": "/?mode=chat"
-                }
-            ],
-            "screenshots": [
-                {
-                    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzOTIgODU2IiBmaWxsPSJub25lIj48cmVjdCB3aWR0aD0iMzkyIiBoZWlnaHQ9Ijg1NiIgZmlsbD0iIzEyMTIxMiIvPjxyZWN0IHk9IjY1NiIgd2lkdGg9IjM5MiIgaGVpZ2h0PSIyMDAiIGZpbGw9InVybCgjcGFpbnQwX2xpbmVhcl8xXzE2KSIvPjxjaXJjbGUgY3g9IjE5NiIgY3k9IjU3NiIgcj0iODAiIGZpbGw9IiM0RjQ2RTUiLz48cGF0aCBkPSJNMjMwIDU3NkMyMzAgNTk1LjMzIDIxNC4zMyA2MTEgMTk1IDYxMUMxNzUuNjcgNjExIDE2MCA1OTUuMzMgMTYwIDU3NkMxNjAgNTU2LjY3IDE3NS42NyA1NDEgMTk1IDU0MUMyMTQuMzMgNTQxIDIzMCA1NTYuNjcgMjMwIDU3NlpNMjE3LjUgNTc2QzIxNy41IDU2My41NCAyMDcuNDYgNTUzLjUgMTk1IDU1My41QzE4Mi41NCA1NTMuNSAxNzIuNSA1NjMuNTQgMTcyLjUgNTc2QzE3Mi41IDU4OC40NiAxODIuNTQgNTk4LjUgMTk1IDU5OC41QzIwNy40NiA1OTguNSAyMTcuNSA1ODguNDYgMjE3LjUgNTc2Wk0yNDguMyA1MjIuN0MyMzguNyA1MTMuMSAyMjMuMyA1MTMuMSAyMTMuNyA1MjIuN0wxOTUgNTQxTDE3Ni4zIDUyMi43QzE2Ni43IDUxMy4xIDE1MS4zIDUxMy4xIDE0MS43IDUyMi43QzEzMi4xIDUzMi4zIDEzMi4xIDU0Ny43IDE0MS43IDU1Ny4zTDE3Ni43IDU5Mi4zQzE4Ni4zIDYwMS45IDIwMS43IDYwMS45IDIxMS4zIDU5Mi4zTDI0Ni4zIDU1Ny4zQzI1NS45IDU0Ny43IDI1NS45IDUzMi4zIDI0Ni4zIDUyMi43SDI0OC4zWiIgZmlsbD0id2hpdGUiLz48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MF9saW5lYXJfMV8xNiIgeDE9IjE5NiIgeTE9IjY1NiIgeDI9IjE5NiIgeTI9Ijg1NiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPjxzdG9wIHN0b3AtY29sb3I9IiMxMjEyMTIiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMyMjQ0ODgiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48L3N2Zz4=",
-                    "sizes": "392x856",
-                    "type": "image/svg+xml",
-                    "form_factor": "narrow"
-                }
-            ],
-            "related_applications": [],
-            "prefer_related_applications": false
+            ]
         };
 
         const manifestBlob = new Blob([JSON.stringify(manifestContent)], { type: 'application/json' });
@@ -639,12 +586,15 @@
         // === CONFIGURATION ===
         const config = {
             visualization: {
-                analyserFftSize: 2048,
-                smoothingTimeConstant: 0.85,
-                minIntensity: 1,      // Minimum wave animation intensity
-                maxIntensity: 2.5,    // Maximum wave animation intensity
-                silenceThreshold: 35, // Threshold for considering audio as silence (0-255)
-                intensityUpdateInterval: 100 // How often to update wave intensity in ms
+                analyserFftSize: 512,
+                smoothingTimeConstant: 0.5,
+                dotCount: 32,              // Number of dots in the wave visualization
+                minAmplitude: 0.1,         // Minimum dot amplitude (multiples of base height)
+                maxAmplitude: 2.5,         // Maximum dot amplitude (multiples of base height)
+                silenceThreshold: 10,      // Threshold for considering audio as silence (0-255)
+                analysisInterval: 50,      // How often to update the wave in ms
+                dotBaseColor: '#0082E6',   // Base color for dots
+                dotActiveColor: '#4285F4'  // Color for more active dots
             },
             messages: {
                 idle: "Appuyez pour parler",
@@ -660,16 +610,12 @@
             micButton: document.getElementById('mic-button'),
             cancelButton: document.getElementById('cancel-button'),
             waveVisualizer: document.getElementById('wave-visualizer'),
+            linearWave: document.getElementById('linear-wave'),
             statusText: document.getElementById('status-text'),
             transcription: document.getElementById('transcription'),
             
-            // Wave elements
-            ocean: document.querySelector('.ocean'),
-            waves: document.querySelectorAll('.wave'),
-            glowOverlay: document.querySelector('.glow-overlay'),
-            
             // Mode toggle elements
-            modeToggle: document.getElementById('mode-toggle'),
+            modeToggle: document.querySelector('#chat-icon').parentElement,
             chatIcon: document.getElementById('chat-icon'),
             micIcon: document.getElementById('mic-icon'),
             
@@ -698,15 +644,51 @@
             audioStream: null,
             microphoneActive: false,
             
-            // Wave animation state
-            currentIntensity: 1,
-            intensityInterval: null,
-            waveActive: false,
+            // Wave visualization
+            waveDots: [],
+            updateInterval: null,
             
             // Chat state
             currentMode: 'voice', // 'voice' or 'chat'
             messages: [] // To store chat messages
         };
+        
+        // === WAVE VISUALIZATION SETUP ===
+        
+        // Initialize dots for the linear wave
+        function initializeWaveDots() {
+            const container = elements.linearWave;
+            container.innerHTML = ''; // Clear any existing dots
+            state.waveDots = [];
+            
+            // Create dots
+            for (let i = 0; i < config.visualization.dotCount; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'wave-dot';
+                container.appendChild(dot);
+                state.waveDots.push(dot);
+            }
+            
+            // Make the wave visible all the time
+            updateWaveDotsInitial();
+        }
+        
+        // Set initial state for dots (flat line)
+        function updateWaveDotsInitial() {
+            // Create a gentle wave pattern for the initial state
+            state.waveDots.forEach((dot, index) => {
+                // Initial height - slight variation for visual interest
+                const middlePoint = Math.floor(state.waveDots.length / 2);
+                const distFromMiddle = Math.abs(index - middlePoint) / middlePoint;
+                let initialScale = 1 - (distFromMiddle * 0.5); // Higher in middle, lower at edges
+                
+                // Apply the scale transform
+                dot.style.transform = `scaleY(${initialScale})`;
+                
+                // Slightly vary opacity for visual interest
+                dot.style.opacity = 0.2 + (initialScale * 0.5);
+            });
+        }
         
         // === VOICE RECOGNITION AND AUDIO ANALYSIS ===
         
@@ -821,87 +803,66 @@
             }
         }
         
-        // Start monitoring audio levels and update wave intensity
+        // Start monitoring audio levels and update wave visualization
         function startAudioMonitoring() {
             if (!state.analyser) return;
             
-            // Add active class to waves
-            elements.ocean.parentElement.classList.add('wave-active');
-            state.waveActive = true;
-            
-            // Set initial intensity
-            setWaveIntensity(config.visualization.minIntensity);
-            
-            // Start intensity monitoring
-            state.intensityInterval = setInterval(() => {
+            // Start analysis interval
+            state.updateInterval = setInterval(() => {
                 if (!state.isListening || !state.analyser) {
-                    clearInterval(state.intensityInterval);
-                    state.intensityInterval = null;
+                    clearInterval(state.updateInterval);
+                    state.updateInterval = null;
                     return;
                 }
                 
-                // Get frequency data for volume calculation
+                // Get frequency data
                 state.analyser.getByteFrequencyData(state.dataArray);
                 
-                // Calculate average volume
-                let sum = 0;
-                for (let i = 0; i < state.dataArray.length; i++) {
-                    sum += state.dataArray[i];
-                }
-                const average = sum / state.dataArray.length;
+                // Update wave visualization
+                updateWaveDots();
                 
-                // Map the average to an intensity value that works well for animation
-                let intensity;
-                if (average < config.visualization.silenceThreshold) {
-                    // If below threshold, go to minimum intensity (calm state)
-                    intensity = config.visualization.minIntensity;
-                } else {
-                    // Otherwise, map it to our range - apply curve for smoother response
-                    const normalized = Math.min(1, (average - config.visualization.silenceThreshold) / (255 - config.visualization.silenceThreshold));
-                    intensity = config.visualization.minIntensity + 
-                                normalized * 
-                                (config.visualization.maxIntensity - config.visualization.minIntensity);
-                    
-                    // Apply a curve for better visual response
-                    intensity = config.visualization.minIntensity + 
-                                Math.pow(normalized, 1.5) * 
-                                (config.visualization.maxIntensity - config.visualization.minIntensity);
-                }
-                
-                // Apply the intensity with smoothing
-                setWaveIntensity(intensity);
-            }, config.visualization.intensityUpdateInterval);
+            }, config.visualization.analysisInterval);
         }
         
-        // Set the wave animation intensity
-        function setWaveIntensity(intensity) {
-            // Smooth transition by limiting change per update
-            const maxChange = 0.2;
-            const diff = intensity - state.currentIntensity;
-            const change = Math.min(Math.abs(diff), maxChange) * (diff > 0 ? 1 : -1);
+        // Update the wave dots based on the audio data
+        function updateWaveDots() {
+            if (!state.waveDots.length || !state.dataArray) return;
             
-            state.currentIntensity = state.currentIntensity + change;
-            elements.ocean.style.setProperty('--intensity', state.currentIntensity);
+            // For each dot, calculate its height based on audio data
+            state.waveDots.forEach((dot, index) => {
+                // Get a frequency bin for this dot
+                const binIndex = Math.floor(index * (state.dataArray.length / state.waveDots.length));
+                let value = state.dataArray[binIndex];
+                
+                // Normalize the value (0-1) and apply a curve for better visual response
+                const amplitude = Math.max(config.visualization.minAmplitude, 
+                                          Math.min(config.visualization.maxAmplitude, 
+                                                  Math.pow(value / 255, 2) * 
+                                                  config.visualization.maxAmplitude));
+                
+                // Apply smooth transitions
+                dot.style.transform = `scaleY(${amplitude})`;
+                
+                // Adjust opacity and color based on activity
+                if (value > 50) {
+                    dot.classList.add('active');
+                    dot.style.opacity = 0.2 + Math.min(0.8, value / 255);
+                } else {
+                    dot.classList.remove('active');
+                    dot.style.opacity = 0.2 + Math.min(0.4, value / 255);
+                }
+            });
         }
         
-        // Stop audio monitoring and reset waves
+        // Stop audio monitoring and reset wave
         function stopAudioMonitoring() {
-            if (state.intensityInterval) {
-                clearInterval(state.intensityInterval);
-                state.intensityInterval = null;
+            if (state.updateInterval) {
+                clearInterval(state.updateInterval);
+                state.updateInterval = null;
             }
             
-            // Reset wave appearance gradually
-            const resetInterval = setInterval(() => {
-                if (state.currentIntensity > config.visualization.minIntensity) {
-                    state.currentIntensity -= 0.1;
-                    elements.ocean.style.setProperty('--intensity', state.currentIntensity);
-                } else {
-                    clearInterval(resetInterval);
-                    elements.ocean.parentElement.classList.remove('wave-active');
-                    state.waveActive = false;
-                }
-            }, 100);
+            // Reset to gentle initial state
+            updateWaveDotsInitial();
         }
         
         // === VOICE INPUT MANAGEMENT ===
@@ -914,6 +875,9 @@
                 
                 // First-time initialization
                 if (!state.analyser && !state.recognition) {
+                    // Set up wave visualization
+                    initializeWaveDots();
+                    
                     // Set up audio processing
                     const recognitionReady = setupSpeechRecognition();
                     const analysisReady = await setupAudioAnalysis();
@@ -949,7 +913,7 @@
                     }
                 }
                 
-                // Start audio monitoring for wave animation
+                // Start audio monitoring for wave visualization
                 startAudioMonitoring();
                 
                 // Update UI state
@@ -1120,6 +1084,9 @@
         
         // Initialize the application
         function initializeApp() {
+            // Create wave visualization
+            initializeWaveDots();
+            
             // Voice button events
             elements.micButton.addEventListener('click', () => {
                 if (!state.isListening) {
