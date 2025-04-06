@@ -7,6 +7,7 @@
     <meta name="theme-color" content="#000000">
     <title>VoiceWave Chat</title>
     <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzRGNDZFNSIvPjxwYXRoIGZpbGw9IiNGRkYiIGQ9Ik02NSA1MGMwIDguMy02LjcgMTUtMTUgMTVzLTE1LTYuNy0xNS0xNSA2LjctMTUgMTUtMTUgMTUgNi43IDE1IDE1em0tNy41IDBjMC00LjEtMy40LTcuNS03LjUtNy41cy03LjUgMy40LTcuNSA3LjUgMy40IDcuNSA3LjUgNy41IDcuNS0zLjQgNy41LTcuNXpNNzMuMyAyNi43Yy0zLjMtMy4zLTguNy0zLjMtMTIgMEw1MCA0MWwtMTEuMy0xMS4zYy0zLjMtMy4zLTguNy0zLjMtMTIgMHMtMy4zIDguNyAwIDEybDE3LjQgMTcuNGMzLjMgMy4zIDguNyAzLjMgMTIgMEw3My4zIDM4LjdjMy4zLTMuMyAzLjMtOC43IDAtMTJ6Ii8+PC9zdmc+">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -34,78 +35,50 @@
         }
         
         /* Visualization container */
-        .wave-visualizer {
-            position: relative;
-            height: 180px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* Linear wave visualization */
-        .linear-wave {
+        .wave-container {
             position: absolute;
-            bottom: 55px;
+            bottom: 120px;
             left: 0;
-            width: 100%;
+            right: 0;
             height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         
-        .wave-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: #0082E6;
-            margin: 0 6px;
-            opacity: 0.6;
-            transition: transform 0.2s ease;
-        }
-        
-        .wave-dot.active {
-            background-color: #4285F4;
-            box-shadow: 0 0 8px rgba(66, 133, 244, 0.8);
-        }
-        
-        /* Glow effect under the wave */
-        .glow-line {
+        /* Style for the thin blue line */
+        .wave-line {
             position: absolute;
-            bottom: 54px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 85%;
+            width: 100%;
             height: 1px;
             background: linear-gradient(90deg, 
                 rgba(0,130,230,0) 0%, 
-                rgba(66,133,244,0.7) 50%, 
+                rgba(66,133,244,0.5) 50%, 
                 rgba(0,130,230,0) 100%);
-            box-shadow: 0 0 12px rgba(66, 133, 244, 0.8);
+            box-shadow: 0 0 8px rgba(66, 133, 244, 0.6);
         }
         
         .mic-gradient {
-            background: linear-gradient(135deg, #4338CA, #6D28D9);
+            background: #4F46E5;
             transition: all 0.5s ease;
         }
         
         .mic-gradient:hover {
-            background: linear-gradient(135deg, #3730A3, #5B21B6);
+            background: #4338CA;
         }
         
         .mic-listening {
-            background: linear-gradient(135deg, #0055E6, #0082E6);
+            background: #4F46E5;
             animation: mic-pulse 2s infinite alternate;
-            box-shadow: 0 0 15px 5px rgba(0, 90, 226, 0.3);
+            box-shadow: 0 0 15px 5px rgba(79, 70, 229, 0.3);
         }
         
         @keyframes mic-pulse {
             0% {
-                box-shadow: 0 0 10px 2px rgba(0, 90, 226, 0.3);
+                box-shadow: 0 0 10px 2px rgba(79, 70, 229, 0.3);
             }
             100% {
-                box-shadow: 0 0 20px 5px rgba(0, 90, 226, 0.5);
+                box-shadow: 0 0 20px 5px rgba(79, 70, 229, 0.5);
             }
         }
         
@@ -220,22 +193,6 @@
             height: 20px;
         }
 
-        .pulse-animation {
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(79, 70, 229, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
-            }
-        }
-
         /* Animation classes */
         .slide-in {
             animation: slideIn 0.4s forwards cubic-bezier(0.16, 1, 0.3, 1);
@@ -254,75 +211,60 @@
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(-100%); opacity: 0; }
         }
-
-        /* Install prompt */
-        #install-prompt {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #222222;
-            border: 1px solid #4F46E5;
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            max-width: 90%;
-            width: 340px;
-            z-index: 100;
-            display: none;
-        }
         
         /* Control buttons */
         .control-buttons {
             position: fixed;
-            bottom: 100px;
+            bottom: 50px;
             left: 0;
             right: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 60px;
+            gap: 80px; /* Large gap between buttons */
             z-index: 10;
         }
         
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            .dark\:bg-darkgray {
-                background-color: #000000;
-            }
-            
-            .dark\:text-white {
-                color: #FFFFFF;
-            }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            background-color: #000;
+            padding: 15px;
+        }
+        
+        .logo {
+            width: 50px;
+            height: 50px;
+            background-color: #4F46E5;
+            border-radius: 50%;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
 
-<body class="bg-dark text-white">
+<body class="bg-black text-white">
     <div class="min-h-screen flex flex-col">
-        <!-- Header -->
-        <header class="fixed top-0 inset-x-0 py-4 px-4 flex items-center justify-between bg-dark/90 backdrop-blur-md z-20">
-            <div class="flex items-center">
-                <div class="relative mr-2 h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                    </svg>
-                </div>
-                <h1 class="text-xl font-bold text-white" id="app-title">VoiceWave Chat</h1>
-            </div>
-            
-            <div class="relative h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center">
-                <svg id="chat-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                </svg>
-                <svg id="mic-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <!-- Header with logo and title -->
+        <header class="logo-container">
+            <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-white">VoiceWave Chat</h1>
+            
+            <div class="ml-auto logo">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                 </svg>
             </div>
         </header>
 
         <!-- Voice interface -->
-        <main id="voice-interface" class="flex-1 pt-16 pb-32 flex flex-col">
+        <main id="voice-interface" class="flex-1 flex flex-col justify-between pb-32">
             <!-- Text display area -->
             <div class="flex-1 flex flex-col items-center justify-center px-6">
                 <!-- Current status -->
@@ -334,27 +276,21 @@
                 <div id="transcription" class="text-2xl text-gray-200 text-center max-w-lg transcription mt-6 mb-6 min-h-[100px]"></div>
             </div>
 
-            <!-- Audio Visualizer -->
-            <div class="mt-auto relative">
-                <div id="wave-visualizer" class="wave-visualizer">
-                    <!-- Linear wave visualization -->
-                    <div class="glow-line"></div>
-                    <div id="linear-wave" class="linear-wave">
-                        <!-- Wave dots will be added here dynamically -->
-                    </div>
-                </div>
+            <!-- Wave visualization (thin blue line) -->
+            <div class="wave-container">
+                <div class="wave-line"></div>
             </div>
             
             <!-- Control buttons -->
             <div class="control-buttons">
-                <button id="cancel-button" class="h-16 w-16 bg-red-500 rounded-full flex items-center justify-center focus:outline-none shadow-lg transform transition-all duration-300 ease-in-out active:scale-95 hover:bg-red-600">
+                <button id="cancel-button" class="h-16 w-16 bg-red-500 rounded-full flex items-center justify-center focus:outline-none shadow-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
                 
-                <button id="mic-button" class="h-20 w-20 mic-gradient rounded-full flex items-center justify-center focus:outline-none shadow-lg transform transition-all duration-300 ease-in-out active:scale-95">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button id="mic-button" class="h-16 w-16 mic-gradient rounded-full flex items-center justify-center focus:outline-none shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                     </svg>
                 </button>
@@ -388,214 +324,11 @@
                 </div>
             </div>
         </main>
-        
-        <!-- Install Prompt -->
-        <div id="install-prompt" class="text-white">
-            <div class="flex justify-between items-start mb-3">
-                <div class="font-bold text-lg">Installer l'application</div>
-                <button id="close-prompt" class="text-gray-400 hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
-                </button>
-            </div>
-            <p class="text-gray-300 mb-4">Installez VoiceWave sur votre appareil pour une expérience optimale, même hors ligne.</p>
-            <div class="flex space-x-3">
-                <button id="install-button" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg flex-grow">Installer</button>
-                <button id="install-later" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">Plus tard</button>
-            </div>
-        </div>
     </div>
 
     <script>
-        // === SERVICE WORKER REGISTRATION ===
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                // Create an inline service worker with improved caching
-                const swCode = `
-                    const CACHE_NAME = 'voicewave-cache-v1';
-                    const STATIC_RESOURCES = [
-                        './',
-                        './index.html',
-                        './manifest.json'
-                    ];
-
-                    // Install event - cache static resources
-                    self.addEventListener('install', (event) => {
-                        event.waitUntil(
-                            caches.open(CACHE_NAME)
-                                .then((cache) => {
-                                    console.log('Service Worker: Caching static files');
-                                    return cache.addAll(STATIC_RESOURCES);
-                                })
-                                .then(() => self.skipWaiting()) // Force service worker activation
-                        );
-                    });
-
-                    // Activate event - clean up old caches
-                    self.addEventListener('activate', (event) => {
-                        event.waitUntil(
-                            caches.keys().then((cacheNames) => {
-                                return Promise.all(
-                                    cacheNames.filter((cacheName) => {
-                                        return cacheName !== CACHE_NAME;
-                                    }).map((cacheName) => {
-                                        console.log('Service Worker: Removing old cache', cacheName);
-                                        return caches.delete(cacheName);
-                                    })
-                                );
-                            }).then(() => self.clients.claim()) // Take control of clients immediately
-                        );
-                    });
-
-                    // Fetch event - serve from cache or network
-                    self.addEventListener('fetch', (event) => {
-                        event.respondWith(
-                            caches.match(event.request)
-                                .then((cachedResponse) => {
-                                    // Return cached response if available
-                                    if (cachedResponse) {
-                                        return cachedResponse;
-                                    }
-                                    
-                                    // Otherwise fetch from network
-                                    return fetch(event.request)
-                                        .then((networkResponse) => {
-                                            // Don't cache non-successful responses or non-GET requests
-                                            if (!networkResponse || networkResponse.status !== 200 || event.request.method !== 'GET') {
-                                                return networkResponse;
-                                            }
-                                            
-                                            // Clone the response to cache it and return it
-                                            const responseToCache = networkResponse.clone();
-                                            caches.open(CACHE_NAME)
-                                                .then((cache) => {
-                                                    cache.put(event.request, responseToCache);
-                                                });
-                                                
-                                            return networkResponse;
-                                        })
-                                        .catch((error) => {
-                                            console.error('Service Worker: Fetch error', error);
-                                            // You could return a custom offline page here
-                                        });
-                                })
-                        );
-                    });
-                `;
-
-                const swBlob = new Blob([swCode], { type: 'text/javascript' });
-                const swURL = URL.createObjectURL(swBlob);
-
-                navigator.serviceWorker.register(swURL)
-                    .then(registration => {
-                        console.log('Service Worker registered with scope:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.error('Service Worker registration failed:', error);
-                    });
-            });
-        }
-
-        // Create manifest.json and serve it
-        const manifestContent = {
-            "name": "VoiceWave Chat",
-            "short_name": "VoiceWave",
-            "description": "Application de chat vocal avec visualisation d'ondes sonores",
-            "start_url": "/",
-            "display": "standalone",
-            "background_color": "#000000",
-            "theme_color": "#000000",
-            "orientation": "portrait",
-            "categories": ["productivity", "communication"],
-            "icons": [
-                {
-                    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzRGNDZFNSIvPjxwYXRoIGZpbGw9IiNGRkYiIGQ9Ik02NSA1MGMwIDguMy02LjcgMTUtMTUgMTVzLTE1LTYuNy0xNS0xNSA2LjctMTUgMTUtMTUgMTUgNi43IDE1IDE1em0tNy41IDBjMC00LjEtMy40LTcuNS03LjUtNy41cy03LjUgMy40LTcuNSA3LjUgMy40IDcuNSA3LjUgNy41IDcuNS0zLjQgNy41LTcuNXpNNzMuMyAyNi43Yy0zLjMtMy4zLTguNy0zLjMtMTIgMEw1MCA0MWwtMTEuMy0xMS4zYy0zLjMtMy4zLTguNy0zLjMtMTIgMHMtMy4zIDguNyAwIDEybDE3LjQgMTcuNGMzLjMgMy4zIDguNyAzLjMgMTIgMEw3My4zIDM4LjdjMy4zLTMuMyAzLjMtOC43IDAtMTJ6Ii8+PC9zdmc+",
-                    "sizes": "512x512",
-                    "type": "image/svg+xml",
-                    "purpose": "any"
-                },
-                {
-                    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzRGNDZFNSIvPjxwYXRoIGZpbGw9IiNGRkYiIGQ9Ik02NSA1MGMwIDguMy02LjcgMTUtMTUgMTVzLTE1LTYuNy0xNS0xNSA2LjctMTUgMTUtMTUgMTUgNi43IDE1IDE1em0tNy41IDBjMC00LjEtMy40LTcuNS03LjUtNy41cy03LjUgMy40LTcuNSA3LjUgMy40IDcuNSA3LjUgNy41IDcuNS0zLjQgNy41LTcuNXpNNzMuMyAyNi43Yy0zLjMtMy4zLTguNy0zLjMtMTIgMEw1MCA0MWwtMTEuMy0xMS4zYy0zLjMtMy4zLTguNy0zLjMtMTIgMHMtMy4zIDguNyAwIDEybDE3LjQgMTcuNGMzLjMgMy4zIDguNyAzLjMgMTIgMEw3My4zIDM4LjdjMy4zLTMuMyAzLjMtOC43IDAtMTJ6Ii8+PC9zdmc+",
-                    "sizes": "192x192",
-                    "type": "image/svg+xml",
-                    "purpose": "maskable"
-                }
-            ]
-        };
-
-        const manifestBlob = new Blob([JSON.stringify(manifestContent)], { type: 'application/json' });
-        const manifestURL = URL.createObjectURL(manifestBlob);
-        document.querySelector('link[rel="manifest"]').href = manifestURL;
-
-        // === PWA INSTALL PROMPT ===
-        let deferredPrompt;
-        const installPrompt = document.getElementById('install-prompt');
-        const installButton = document.getElementById('install-button');
-        const closePromptButton = document.getElementById('close-prompt');
-        const installLaterButton = document.getElementById('install-later');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevent Chrome 67 and earlier from automatically showing the prompt
-            e.preventDefault();
-            // Stash the event so it can be triggered later
-            deferredPrompt = e;
-            // Show the install prompt
-            setTimeout(() => {
-                installPrompt.style.display = 'block';
-            }, 3000);
-        });
-
-        installButton.addEventListener('click', () => {
-            // Hide the app provided install promotion
-            installPrompt.style.display = 'none';
-            // Show the install prompt
-            deferredPrompt.prompt();
-            // Wait for the user to respond to the prompt
-            deferredPrompt.userChoice.then((choiceResult) => {
-                if (choiceResult.outcome === 'accepted') {
-                    console.log('User accepted the install prompt');
-                } else {
-                    console.log('User dismissed the install prompt');
-                }
-                deferredPrompt = null;
-            });
-        });
-
-        closePromptButton.addEventListener('click', () => {
-            installPrompt.style.display = 'none';
-        });
-
-        installLaterButton.addEventListener('click', () => {
-            installPrompt.style.display = 'none';
-        });
-
-        // === DARK MODE SUPPORT ===
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.classList.add('dark');
-        }
-
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-            if (event.matches) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        });
-
         // === CONFIGURATION ===
         const config = {
-            visualization: {
-                analyserFftSize: 512,
-                smoothingTimeConstant: 0.5,
-                dotCount: 32,              // Number of dots in the wave visualization
-                minAmplitude: 0.1,         // Minimum dot amplitude (multiples of base height)
-                maxAmplitude: 2.5,         // Maximum dot amplitude (multiples of base height)
-                silenceThreshold: 10,      // Threshold for considering audio as silence (0-255)
-                analysisInterval: 50,      // How often to update the wave in ms
-                dotBaseColor: '#0082E6',   // Base color for dots
-                dotActiveColor: '#4285F4'  // Color for more active dots
-            },
             messages: {
                 idle: "Appuyez pour parler",
                 listening: "Je vous écoute",
@@ -603,21 +336,13 @@
             }
         };
 
-        // === INITIALISATIONS ===
-        
-        // DOM elements
+        // === DOM ELEMENTS ===        
         const elements = {
             micButton: document.getElementById('mic-button'),
             cancelButton: document.getElementById('cancel-button'),
-            waveVisualizer: document.getElementById('wave-visualizer'),
-            linearWave: document.getElementById('linear-wave'),
+            waveLine: document.querySelector('.wave-line'),
             statusText: document.getElementById('status-text'),
             transcription: document.getElementById('transcription'),
-            
-            // Mode toggle elements
-            modeToggle: document.querySelector('#chat-icon').parentElement,
-            chatIcon: document.getElementById('chat-icon'),
-            micIcon: document.getElementById('mic-icon'),
             
             // Interface elements
             voiceInterface: document.getElementById('voice-interface'),
@@ -627,8 +352,7 @@
             messageInput: document.getElementById('message-input'),
             sendMessage: document.getElementById('send-message'),
             chatInputContainer: document.getElementById('chat-input-container'),
-            chatMessages: document.querySelector('.chat-messages'),
-            appTitle: document.getElementById('app-title')
+            chatMessages: document.querySelector('.chat-messages')
         };
         
         // State variables
@@ -644,52 +368,111 @@
             audioStream: null,
             microphoneActive: false,
             
-            // Wave visualization
-            waveDots: [],
-            updateInterval: null,
-            
             // Chat state
             currentMode: 'voice', // 'voice' or 'chat'
             messages: [] // To store chat messages
         };
         
-        // === WAVE VISUALIZATION SETUP ===
-        
-        // Initialize dots for the linear wave
-        function initializeWaveDots() {
-            const container = elements.linearWave;
-            container.innerHTML = ''; // Clear any existing dots
-            state.waveDots = [];
-            
-            // Create dots
-            for (let i = 0; i < config.visualization.dotCount; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'wave-dot';
-                container.appendChild(dot);
-                state.waveDots.push(dot);
-            }
-            
-            // Make the wave visible all the time
-            updateWaveDotsInitial();
-        }
-        
-        // Set initial state for dots (flat line)
-        function updateWaveDotsInitial() {
-            // Create a gentle wave pattern for the initial state
-            state.waveDots.forEach((dot, index) => {
-                // Initial height - slight variation for visual interest
-                const middlePoint = Math.floor(state.waveDots.length / 2);
-                const distFromMiddle = Math.abs(index - middlePoint) / middlePoint;
-                let initialScale = 1 - (distFromMiddle * 0.5); // Higher in middle, lower at edges
-                
-                // Apply the scale transform
-                dot.style.transform = `scaleY(${initialScale})`;
-                
-                // Slightly vary opacity for visual interest
-                dot.style.opacity = 0.2 + (initialScale * 0.5);
+        // === SERVICE WORKER REGISTRATION ===
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', async () => {
+                try {
+                    // Create service worker code
+                    const swCode = `
+                        // Service worker for VoiceWave Chat
+                        const CACHE_NAME = 'voicewave-cache-v1';
+                        
+                        self.addEventListener('install', (event) => {
+                            event.waitUntil(
+                                caches.open(CACHE_NAME).then((cache) => {
+                                    return cache.addAll([
+                                        './',
+                                        './index.html',
+                                        './manifest.json'
+                                    ]);
+                                }).then(() => self.skipWaiting())
+                            );
+                        });
+                        
+                        self.addEventListener('activate', (event) => {
+                            event.waitUntil(
+                                caches.keys().then((keyList) => {
+                                    return Promise.all(keyList.map((key) => {
+                                        if (key !== CACHE_NAME) {
+                                            return caches.delete(key);
+                                        }
+                                    }));
+                                }).then(() => self.clients.claim())
+                            );
+                        });
+                        
+                        self.addEventListener('fetch', (event) => {
+                            event.respondWith(
+                                caches.match(event.request).then((response) => {
+                                    return response || fetch(event.request).then((fetchResponse) => {
+                                        return caches.open(CACHE_NAME).then((cache) => {
+                                            if (event.request.method === 'GET') {
+                                                cache.put(event.request, fetchResponse.clone());
+                                            }
+                                            return fetchResponse;
+                                        });
+                                    });
+                                }).catch(() => {
+                                    // Fallback for offline access
+                                    return caches.match('./index.html');
+                                })
+                            );
+                        });
+                    `;
+                    
+                    // Create service worker blob
+                    const swBlob = new Blob([swCode], { type: 'text/javascript' });
+                    const swURL = URL.createObjectURL(swBlob);
+                    
+                    // Register service worker
+                    const registration = await navigator.serviceWorker.register(swURL, {scope: './'});
+                    console.log('Service Worker registered with scope:', registration.scope);
+                    
+                    // Create manifest.json content
+                    const manifestContent = {
+                        "name": "VoiceWave Chat",
+                        "short_name": "VoiceWave",
+                        "description": "Application de chat vocal avec visualisation d'ondes sonores",
+                        "start_url": "./",
+                        "id": "./",
+                        "display": "standalone",
+                        "background_color": "#000000",
+                        "theme_color": "#000000",
+                        "orientation": "portrait",
+                        "categories": ["productivity", "communication"],
+                        "icons": [
+                            {
+                                "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzRGNDZFNSIvPjxwYXRoIGZpbGw9IiNGRkYiIGQ9Ik02NSA1MGMwIDguMy02LjcgMTUtMTUgMTVzLTE1LTYuNy0xNS0xNSA2LjctMTUgMTUtMTUgMTUgNi43IDE1IDE1em0tNy41IDBjMC00LjEtMy40LTcuNS03LjUtNy41cy03LjUgMy40LTcuNSA3LjUgMy40IDcuNSA3LjUgNy41IDcuNS0zLjQgNy41LTcuNXpNNzMuMyAyNi43Yy0zLjMtMy4zLTguNy0zLjMtMTIgMEw1MCA0MWwtMTEuMy0xMS4zYy0zLjMtMy4zLTguNy0zLjMtMTIgMHMtMy4zIDguNyAwIDEybDE3LjQgMTcuNGMzLjMgMy4zIDguNyAzLjMgMTIgMEw3My4zIDM4LjdjMy4zLTMuMyAzLjMtOC43IDAtMTJ6Ii8+PC9zdmc+",
+                                "sizes": "512x512",
+                                "type": "image/svg+xml",
+                                "purpose": "any"
+                            },
+                            {
+                                "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzRGNDZFNSIvPjxwYXRoIGZpbGw9IiNGRkYiIGQ9Ik02NSA1MGMwIDguMy02LjcgMTUtMTUgMTVzLTE1LTYuNy0xNS0xNSA2LjctMTUgMTUtMTUgMTUgNi43IDE1IDE1em0tNy41IDBjMC00LjEtMy40LTcuNS03LjUtNy41cy03LjUgMy40LTcuNSA3LjUgMy40IDcuNSA3LjUgNy41IDcuNS0zLjQgNy41LTcuNXpNNzMuMyAyNi43Yy0zLjMtMy4zLTguNy0zLjMtMTIgMEw1MCA0MWwtMTEuMy0xMS4zYy0zLjMtMy4zLTguNy0zLjMtMTIgMHMtMy4zIDguNyAwIDEybDE3LjQgMTcuNGMzLjMgMy4zIDguNyAzLjMgMTIgMEw3My4zIDM4LjdjMy4zLTMuMyAzLjMtOC43IDAtMTJ6Ii8+PC9zdmc+",
+                                "sizes": "192x192",
+                                "type": "image/svg+xml",
+                                "purpose": "maskable"
+                            }
+                        ]
+                    };
+                    
+                    // Create manifest blob
+                    const manifestBlob = new Blob([JSON.stringify(manifestContent)], {type: 'application/json'});
+                    const manifestURL = URL.createObjectURL(manifestBlob);
+                    
+                    // Set manifest link
+                    document.querySelector('link[rel="manifest"]').href = manifestURL;
+                } catch (error) {
+                    console.error('Service Worker registration failed:', error);
+                }
             });
         }
-        
+
         // === VOICE RECOGNITION AND AUDIO ANALYSIS ===
         
         // Initialize Web Speech API for voice recognition
@@ -733,6 +516,19 @@
                 
                 // Display complete text (both final and interim)
                 elements.transcription.textContent = finalTranscript + interimTranscript;
+                
+                // Activate the wave when speaking
+                elements.waveLine.style.boxShadow = '0 0 12px rgba(66, 133, 244, 0.8)';
+                elements.waveLine.style.height = '2px';
+                
+                // Return to normal state after a short delay
+                clearTimeout(state.waveTimeout);
+                state.waveTimeout = setTimeout(() => {
+                    if (state.isListening) {
+                        elements.waveLine.style.boxShadow = '0 0 8px rgba(66, 133, 244, 0.6)';
+                        elements.waveLine.style.height = '1px';
+                    }
+                }, 500);
             };
             
             state.recognition.onerror = (event) => {
@@ -786,8 +582,8 @@
                 state.analyser = state.audioContext.createAnalyser();
                 
                 // Configure analyzer
-                state.analyser.fftSize = config.visualization.analyserFftSize;
-                state.analyser.smoothingTimeConstant = config.visualization.smoothingTimeConstant;
+                state.analyser.fftSize = 2048;
+                state.analyser.smoothingTimeConstant = 0.8;
                 
                 // Prepare data array for analysis
                 const bufferLength = state.analyser.frequencyBinCount;
@@ -803,71 +599,9 @@
             }
         }
         
-        // Start monitoring audio levels and update wave visualization
-        function startAudioMonitoring() {
-            if (!state.analyser) return;
-            
-            // Start analysis interval
-            state.updateInterval = setInterval(() => {
-                if (!state.isListening || !state.analyser) {
-                    clearInterval(state.updateInterval);
-                    state.updateInterval = null;
-                    return;
-                }
-                
-                // Get frequency data
-                state.analyser.getByteFrequencyData(state.dataArray);
-                
-                // Update wave visualization
-                updateWaveDots();
-                
-            }, config.visualization.analysisInterval);
-        }
-        
-        // Update the wave dots based on the audio data
-        function updateWaveDots() {
-            if (!state.waveDots.length || !state.dataArray) return;
-            
-            // For each dot, calculate its height based on audio data
-            state.waveDots.forEach((dot, index) => {
-                // Get a frequency bin for this dot
-                const binIndex = Math.floor(index * (state.dataArray.length / state.waveDots.length));
-                let value = state.dataArray[binIndex];
-                
-                // Normalize the value (0-1) and apply a curve for better visual response
-                const amplitude = Math.max(config.visualization.minAmplitude, 
-                                          Math.min(config.visualization.maxAmplitude, 
-                                                  Math.pow(value / 255, 2) * 
-                                                  config.visualization.maxAmplitude));
-                
-                // Apply smooth transitions
-                dot.style.transform = `scaleY(${amplitude})`;
-                
-                // Adjust opacity and color based on activity
-                if (value > 50) {
-                    dot.classList.add('active');
-                    dot.style.opacity = 0.2 + Math.min(0.8, value / 255);
-                } else {
-                    dot.classList.remove('active');
-                    dot.style.opacity = 0.2 + Math.min(0.4, value / 255);
-                }
-            });
-        }
-        
-        // Stop audio monitoring and reset wave
-        function stopAudioMonitoring() {
-            if (state.updateInterval) {
-                clearInterval(state.updateInterval);
-                state.updateInterval = null;
-            }
-            
-            // Reset to gentle initial state
-            updateWaveDotsInitial();
-        }
-        
         // === VOICE INPUT MANAGEMENT ===
         
-        // Start voice listening with robust error handling
+        // Start voice listening
         async function startListening() {
             try {
                 // Clear previous transcript
@@ -875,9 +609,6 @@
                 
                 // First-time initialization
                 if (!state.analyser && !state.recognition) {
-                    // Set up wave visualization
-                    initializeWaveDots();
-                    
                     // Set up audio processing
                     const recognitionReady = setupSpeechRecognition();
                     const analysisReady = await setupAudioAnalysis();
@@ -913,8 +644,8 @@
                     }
                 }
                 
-                // Start audio monitoring for wave visualization
-                startAudioMonitoring();
+                // Activate wave
+                elements.waveLine.style.boxShadow = '0 0 8px rgba(66, 133, 244, 0.6)';
                 
                 // Update UI state
                 updateListeningState(true);
@@ -925,7 +656,7 @@
             }
         }
         
-        // Stop voice listening with reliable cleanup
+        // Stop voice listening
         function stopListening() {
             // Update state
             state.isListening = false;
@@ -939,8 +670,9 @@
                 }
             }
             
-            // Stop audio monitoring
-            stopAudioMonitoring();
+            // Reset wave style
+            elements.waveLine.style.boxShadow = '0 0 8px rgba(66, 133, 244, 0.4)';
+            elements.waveLine.style.height = '1px';
             
             // Update UI
             updateListeningState(false);
@@ -981,52 +713,16 @@
                 stopListening();
             }
             
-            // Update title and toggle button icons
+            // Update interfaces
             if (mode === 'voice') {
-                elements.appTitle.textContent = 'VoiceWave Chat';
-                elements.chatIcon.classList.remove('hidden');
-                elements.micIcon.classList.add('hidden');
-                
-                // Slide out chat interface
-                elements.chatInterface.classList.add('slide-out');
-                
-                // Wait for animation to complete
-                setTimeout(() => {
-                    elements.chatInterface.style.display = 'none';
-                    elements.chatInterface.classList.remove('slide-out');
-                    
-                    // Show voice interface
-                    elements.voiceInterface.style.display = 'flex';
-                    elements.voiceInterface.classList.add('slide-in');
-                    
-                    setTimeout(() => {
-                        elements.voiceInterface.classList.remove('slide-in');
-                    }, 400);
-                }, 400);
+                elements.chatInterface.style.display = 'none';
+                elements.voiceInterface.style.display = 'flex';
             } else {
-                elements.appTitle.textContent = 'Chat Écrit';
-                elements.chatIcon.classList.add('hidden');
-                elements.micIcon.classList.remove('hidden');
+                elements.voiceInterface.style.display = 'none';
+                elements.chatInterface.style.display = 'flex';
                 
-                // Slide out voice interface
-                elements.voiceInterface.classList.add('slide-out');
-                
-                // Wait for animation to complete
-                setTimeout(() => {
-                    elements.voiceInterface.style.display = 'none';
-                    elements.voiceInterface.classList.remove('slide-out');
-                    
-                    // Show chat interface
-                    elements.chatInterface.style.display = 'flex';
-                    elements.chatInterface.classList.add('slide-in');
-                    
-                    // Focus input
-                    elements.messageInput.focus();
-                    
-                    setTimeout(() => {
-                        elements.chatInterface.classList.remove('slide-in');
-                    }, 400);
-                }, 400);
+                // Focus input
+                elements.messageInput.focus();
             }
             
             // Update current mode
@@ -1060,19 +756,11 @@
             const text = elements.messageInput.value.trim();
             if (!text) return;
             
-            // Add visual feedback - pulse animation
-            elements.chatInputContainer.classList.add('pulse-animation');
-            
             // Add user message
             addMessage(text, true);
             
             // Clear input
             elements.messageInput.value = '';
-            
-            // Remove pulse animation after a short delay
-            setTimeout(() => {
-                elements.chatInputContainer.classList.remove('pulse-animation');
-            }, 300);
             
             // Add automatic response (in a real app, this would be an API call)
             setTimeout(() => {
@@ -1084,9 +772,6 @@
         
         // Initialize the application
         function initializeApp() {
-            // Create wave visualization
-            initializeWaveDots();
-            
             // Voice button events
             elements.micButton.addEventListener('click', () => {
                 if (!state.isListening) {
@@ -1100,48 +785,28 @@
                 stopListening();
             });
             
-            // Mode toggle button
-            elements.modeToggle.addEventListener('click', () => {
-                if (state.currentMode === 'voice') {
-                    switchMode('chat');
-                } else {
-                    switchMode('voice'); 
-                }
+            // Mode toggle - chat button
+            document.querySelector('.logo:last-child').addEventListener('click', () => {
+                switchMode('chat');
             });
             
             // Send message button
-            elements.sendMessage.addEventListener('click', sendMessage);
-            
-            // Dynamic input effects
-            elements.messageInput.addEventListener('focus', () => {
-                elements.chatInputContainer.classList.add('shadow-lg');
-            });
-            
-            elements.messageInput.addEventListener('blur', () => {
-                elements.chatInputContainer.classList.remove('shadow-lg');
-            });
+            elements.sendMessage?.addEventListener('click', sendMessage);
             
             // Send message on Enter key
-            elements.messageInput.addEventListener('keypress', (e) => {
+            elements.messageInput?.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     sendMessage();
                 }
             });
             
-            // Add dynamic effect when typing
-            elements.messageInput.addEventListener('input', () => {
-                if (elements.messageInput.value.trim() !== '') {
-                    elements.sendMessage.classList.add('scale-110');
-                } else {
-                    elements.sendMessage.classList.remove('scale-110');
-                }
+            // Check for beforeinstallprompt event
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // Store the event so it can be triggered later
+                console.log('PWA can be installed!');
+                // Optionally, you can trigger prompt automatically
+                // e.prompt();
             });
-            
-            // Handle URL parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('mode') === 'chat') {
-                switchMode('chat');
-            }
             
             // Prevent app from going to sleep when active
             if ('wakeLock' in navigator) {
@@ -1169,7 +834,7 @@
                 });
             }
             
-            // Make sure the visualization works after the app returns from background
+            // Make sure the app works when returning from background
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible' && state.isListening) {
                     // Resume the audio context if it got suspended
