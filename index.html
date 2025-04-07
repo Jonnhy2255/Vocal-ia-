@@ -3,22 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Application de chat vocal avec visualisation d'onde sonore">
-    <meta name="theme-color" content="#000000">
-    <title>VoiceWave Chat</title>
-    <link rel="manifest" href="manifest.json">
+    <title>VocalWave</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: '#4F46E5',
-                        dark: '#000000',
-                        darkgray: '#121212',
-                        darklight: '#222222',
-                        accent: '#005AE2',
-                        glow: '#0082E6'
+                        primary: '#2E6FF2',
+                        accent: '#7C4DFF',
+                        glow: '#3A86FF',
+                        darkbg: '#0A0A15',
                     },
                 }
             }
@@ -29,142 +25,165 @@
         body {
             touch-action: manipulation;
             overflow: hidden;
-            background-color: #000000;
-            color: #FFFFFF;
         }
         
-        /* Visualization container */
-        .wave-visualizer {
+        .audio-visualizer {
             position: relative;
-            height: 80px;
+            height: 220px;
             overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 5;
         }
         
-        /* Linear wave visualization */
-        .linear-wave {
+        .visualizer-container {
             position: absolute;
-            bottom: 25px;
+            bottom: 0;
             left: 0;
             width: 100%;
-            height: 30px;
+            height: 100%;
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             justify-content: center;
+            padding: 0 20px;
         }
         
-        .wave-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: #0082E6;
-            margin: 0 6px;
+        .bar {
+            width: 6px;
+            border-radius: 8px;
+            margin: 0 3px;
+            background: linear-gradient(to top, 
+                rgba(46, 111, 242, 0.9), 
+                rgba(59, 130, 246, 0.8) 40%, 
+                rgba(124, 77, 255, 0.8) 70%, 
+                rgba(139, 92, 246, 0.6));
+            transition: height 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-origin: bottom center;
+            box-shadow: 0 0 12px rgba(58, 134, 255, 0.5);
             opacity: 0.6;
-            transition: transform 0.2s ease;
         }
         
-        .wave-dot.active {
-            background-color: #4285F4;
-            box-shadow: 0 0 8px rgba(66, 133, 244, 0.8);
+        .active .bar {
+            opacity: 1;
+            animation: gentleColorshift 8s infinite alternate ease-in-out;
         }
         
-        /* Glow effect under the wave with AI wave animation */
-        .glow-line {
-            position: absolute;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 85%;
-            height: 2px;
-            background: linear-gradient(90deg, 
-                rgba(0,130,230,0) 0%, 
-                rgba(66,133,244,0.7) 50%, 
-                rgba(0,130,230,0) 100%);
-            box-shadow: 0 0 12px rgba(66, 133, 244, 0.8);
-            animation: ai-wave 5s infinite ease-in-out;
-        }
-        
-        /* AI wave animation */
-        @keyframes ai-wave {
+        @keyframes gentleColorshift {
             0% {
-                width: 70%;
-                opacity: 0.6;
-                height: 2px;
-                box-shadow: 0 0 10px rgba(66, 133, 244, 0.6);
-            }
-            25% {
-                width: 85%;
-                opacity: 0.9;
-                height: 2.5px;
-                box-shadow: 0 0 16px rgba(66, 133, 244, 0.8);
+                filter: hue-rotate(0deg) brightness(1.1);
+                box-shadow: 0 0 15px rgba(58, 134, 255, 0.6);
             }
             50% {
-                width: 80%;
-                opacity: 0.7;
-                height: 1.5px;
-                box-shadow: 0 0 12px rgba(0, 130, 230, 0.7);
-            }
-            75% {
-                width: 90%;
-                opacity: 0.8;
-                height: 2px;
-                box-shadow: 0 0 14px rgba(66, 133, 244, 0.9);
+                filter: hue-rotate(30deg) brightness(1.3);
+                box-shadow: 0 0 20px rgba(124, 77, 255, 0.7);
             }
             100% {
-                width: 70%;
-                opacity: 0.6;
-                height: 2px;
-                box-shadow: 0 0 10px rgba(66, 133, 244, 0.6);
+                filter: hue-rotate(0deg) brightness(1.1);
+                box-shadow: 0 0 15px rgba(58, 134, 255, 0.6);
             }
         }
         
-        /* Glowing pulse effect for AI interaction */
-        .ai-pulse {
-            animation: ai-pulse 3s infinite alternate;
+        .glow {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 180px;
+            background: radial-gradient(
+                ellipse at center bottom, 
+                rgba(58, 134, 255, 0.4), 
+                rgba(124, 77, 255, 0.3) 40%, 
+                rgba(46, 111, 242, 0.2) 60%, 
+                transparent 80%
+            );
+            opacity: 0;
+            transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: blur(20px);
         }
         
-        @keyframes ai-pulse {
-            0% {
-                box-shadow: 0 0 10px 1px rgba(66, 133, 244, 0.5);
-            }
-            100% {
-                box-shadow: 0 0 20px 5px rgba(0, 130, 230, 0.8);
-            }
+        .active .glow {
+            opacity: 1;
+        }
+        
+        .wave-bg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(0deg, 
+                rgba(58, 134, 255, 0.2) 0%, 
+                rgba(124, 77, 255, 0.1) 60%,
+                rgba(0, 0, 0, 0) 100%);
+            transform: scaleY(0);
+            transform-origin: bottom;
+            transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .active .wave-bg {
+            transform: scaleY(1);
         }
         
         .mic-gradient {
-            background: linear-gradient(135deg, #4338CA, #6D28D9);
+            background: linear-gradient(135deg, #2E6FF2, #7C4DFF);
+            box-shadow: 0 0 20px rgba(46, 111, 242, 0.5);
             transition: all 0.5s ease;
         }
         
         .mic-gradient:hover {
-            background: linear-gradient(135deg, #3730A3, #5B21B6);
+            background: linear-gradient(135deg, #3A86FF, #9D70FF);
+            box-shadow: 0 0 25px rgba(58, 134, 255, 0.7);
         }
         
         .mic-listening {
-            background: linear-gradient(135deg, #0055E6, #0082E6);
-            animation: mic-pulse 2s infinite alternate;
-            box-shadow: 0 0 15px 5px rgba(0, 90, 226, 0.3);
-        }
-        
-        @keyframes mic-pulse {
-            0% {
-                box-shadow: 0 0 10px 2px rgba(0, 90, 226, 0.3);
-            }
-            100% {
-                box-shadow: 0 0 20px 5px rgba(0, 90, 226, 0.5);
-            }
+            background: linear-gradient(135deg, #3A86FF, #7C4DFF);
+            box-shadow: 0 0 30px rgba(124, 77, 255, 0.7);
+            animation: pulse 2s infinite;
         }
         
         .status-text {
             transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            text-shadow: 0 0 10px rgba(58, 134, 255, 0.5);
         }
         
         .transcription {
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        /* Wave animations */
+        .wave-animation {
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 200%;
+            height: 60px;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" fill="%233A86FF" /></svg>');
+            background-size: 1200px 100%;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+        
+        .active .wave-animation {
+            opacity: 0.6;
+            animation: wave 12s linear infinite;
+        }
+        
+        .wave-animation-2 {
+            height: 40px;
+            bottom: -15px;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" fill="%237C4DFF" /></svg>');
+            animation-delay: -5s;
+            animation-duration: 15s;
+        }
+        
+        @keyframes wave {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-600px);
+            }
+        }
+        
+        .dark {
+            color-scheme: dark;
         }
         
         /* Chat interface styles */
@@ -177,7 +196,7 @@
         .chat-messages {
             overflow-y: auto;
             scrollbar-width: thin;
-            scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+            scrollbar-color: rgba(58, 134, 255, 0.5) transparent;
         }
         
         .chat-messages::-webkit-scrollbar {
@@ -189,7 +208,7 @@
         }
         
         .chat-messages::-webkit-scrollbar-thumb {
-            background-color: rgba(156, 163, 175, 0.5);
+            background-color: rgba(58, 134, 255, 0.5);
             border-radius: 20px;
         }
         
@@ -201,35 +220,38 @@
         }
         
         .user-message {
-            background-color: #4F46E5;
+            background: linear-gradient(135deg, #2E6FF2, #3A86FF);
             color: white;
             border-top-right-radius: 4px;
             align-self: flex-end;
+            box-shadow: 0 2px 10px rgba(46, 111, 242, 0.3);
         }
         
         .system-message {
-            background-color: #222222;
+            background-color: rgba(124, 77, 255, 0.1);
             color: #F3F4F6;
             border-top-left-radius: 4px;
             align-self: flex-start;
+            border: 1px solid rgba(124, 77, 255, 0.2);
+            box-shadow: 0 2px 10px rgba(124, 77, 255, 0.1);
         }
 
         /* Enhanced chat input styles */
         .chat-input-container {
-            background-color: #222222;
+            background-color: rgba(124, 77, 255, 0.1);
             border-radius: 28px;
             padding: 8px 8px 8px 20px;
             display: flex;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 15px rgba(46, 111, 242, 0.1);
             transition: all 0.3s ease;
             margin: 0 4px;
-            border: 2px solid transparent;
+            border: 1px solid rgba(124, 77, 255, 0.2);
         }
         
         .chat-input-container:focus-within {
-            border-color: #4F46E5;
-            box-shadow: 0 2px 15px rgba(79, 70, 229, 0.15);
+            border-color: #3A86FF;
+            box-shadow: 0 2px 20px rgba(58, 134, 255, 0.2);
         }
         
         .chat-input {
@@ -243,7 +265,7 @@
         }
         
         .chat-send-button {
-            background: linear-gradient(135deg, #4338CA, #6D28D9);
+            background: linear-gradient(135deg, #2E6FF2, #7C4DFF);
             color: white;
             border-radius: 50%;
             width: 42px;
@@ -254,11 +276,13 @@
             cursor: pointer;
             transform: scale(1);
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 10px rgba(46, 111, 242, 0.4);
         }
         
         .chat-send-button:hover {
             transform: scale(1.05);
-            background: linear-gradient(135deg, #3730A3, #5B21B6);
+            background: linear-gradient(135deg, #3A86FF, #9D70FF);
+            box-shadow: 0 0 15px rgba(58, 134, 255, 0.6);
         }
         
         .chat-send-button:active {
@@ -276,13 +300,13 @@
         
         @keyframes pulse {
             0% {
-                box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
+                box-shadow: 0 0 0 0 rgba(58, 134, 255, 0.4);
             }
             70% {
-                box-shadow: 0 0 0 10px rgba(79, 70, 229, 0);
+                box-shadow: 0 0 0 15px rgba(58, 134, 255, 0);
             }
             100% {
-                box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+                box-shadow: 0 0 0 0 rgba(58, 134, 255, 0);
             }
         }
 
@@ -304,63 +328,43 @@
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(-100%); opacity: 0; }
         }
-
-        /* Install prompt */
-        #install-prompt {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #222222;
-            border: 1px solid #4F46E5;
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            max-width: 90%;
-            width: 340px;
-            z-index: 100;
-            display: none;
+        
+        /* Floating effect */
+        .floating {
+            animation: floating 3s ease-in-out infinite;
         }
         
-        /* Background gradient */
-        .background-gradient {
-            background: linear-gradient(to bottom, 
-                rgba(0,0,0,1) 0%, 
-                rgba(0,12,40,1) 70%, 
-                rgba(0,15,60,0.9) 100%);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: -1;
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
         }
     </style>
 </head>
 
-<body class="bg-dark text-white">
-    <!-- Background gradient -->
-    <div class="background-gradient"></div>
-
+<body class="dark bg-darkbg text-white transition-colors duration-500">
     <div class="min-h-screen flex flex-col">
         <!-- Header -->
-        <header class="fixed top-0 inset-x-0 py-4 px-4 flex items-center justify-between bg-dark/90 backdrop-blur-md z-20">
+        <header class="fixed top-0 inset-x-0 py-4 px-4 flex items-center justify-between bg-darkbg/80 backdrop-blur-md z-20 border-b border-glow/20">
             <div class="flex items-center">
-                <div class="relative mr-2 h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                    </svg>
+                <div class="relative mr-2 h-6 w-6 floating">
+                    <div class="absolute inset-0 rounded-full bg-glow opacity-25"></div>
+                    <div class="relative rounded-full h-6 w-6 bg-gradient-to-r from-primary to-accent flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                    </div>
                 </div>
-                <h1 class="text-xl font-bold text-white" id="app-title">VoiceWave Chat</h1>
+                <h1 class="text-xl font-bold text-white" id="app-title">VocalWave</h1>
             </div>
             
-            <button id="mode-toggle" class="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center focus:outline-none shadow-md transform transition-all duration-300 ease-in-out active:scale-95 hover:bg-opacity-90">
+            <button id="mode-toggle" class="h-10 w-10 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center focus:outline-none shadow-lg shadow-glow/30 transform transition-all duration-300 ease-in-out active:scale-95 hover:shadow-glow/50">
                 <!-- Chat icon (shown in voice mode) -->
-                <svg id="chat-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg id="chat-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                 </svg>
                 <!-- Mic icon (shown in chat mode) -->
-                <svg id="mic-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg id="mic-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                 </svg>
             </button>
@@ -372,32 +376,32 @@
             <div class="flex-1 flex flex-col items-center justify-center px-6">
                 <!-- Current status -->
                 <div id="status-text" class="text-xl font-medium text-white text-center mb-4 status-text">
-                    Je vous écoute
+                    Appuyez pour parler
                 </div>
                 
                 <!-- Real-time transcription - displays what's being heard -->
-                <div id="transcription" class="text-2xl text-gray-200 text-center max-w-lg transcription mt-6 mb-6 min-h-[100px]"></div>
+                <div id="transcription" class="text-2xl text-blue-100 text-center max-w-lg transcription mt-6 mb-6 min-h-[100px]"></div>
             </div>
 
             <!-- Audio Visualizer -->
             <div class="mt-auto">
-                <div id="wave-visualizer" class="wave-visualizer">
-                    <!-- Linear wave visualization with enhanced AI animation -->
-                    <div class="glow-line ai-pulse"></div>
-                    <div id="linear-wave" class="linear-wave">
-                        <!-- Wave dots will be added here dynamically -->
-                    </div>
+                <div id="audio-visualizer" class="audio-visualizer">
+                    <div class="wave-bg"></div>
+                    <div class="wave-animation"></div>
+                    <div class="wave-animation wave-animation-2"></div>
+                    <div class="visualizer-container" id="visualizer-bars"></div>
+                    <div class="glow"></div>
                 </div>
                 
-                <!-- Control buttons - positionnés plus bas avec mt-16 au lieu de mt-8 -->
-                <div class="flex justify-center items-center gap-6 mb-20 mt-16">
-                    <button id="cancel-button" class="h-16 w-16 bg-red-500 rounded-full flex items-center justify-center focus:outline-none shadow-lg transform transition-all duration-300 ease-in-out active:scale-95 hover:bg-red-600">
+                <!-- Control buttons -->
+                <div class="flex justify-center items-center gap-6 mb-20 mt-8">
+                    <button id="cancel-button" class="h-16 w-16 bg-red-500 rounded-full flex items-center justify-center focus:outline-none shadow-lg shadow-red-500/30 transform transition-all duration-300 ease-in-out active:scale-95 hover:bg-red-600 hover:shadow-red-500/50">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                     
-                    <button id="mic-button" class="h-20 w-20 mic-gradient rounded-full flex items-center justify-center focus:outline-none shadow-lg transform transition-all duration-300 ease-in-out active:scale-95">
+                    <button id="mic-button" class="h-20 w-20 mic-gradient rounded-full flex items-center justify-center focus:outline-none shadow-lg transform transition-all duration-300 ease-in-out active:scale-95 floating">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                         </svg>
@@ -411,13 +415,13 @@
             <!-- Chat messages area -->
             <div class="chat-messages flex-1 flex flex-col px-4 py-2 overflow-y-auto mb-2">
                 <div class="message system-message">
-                    Bienvenue dans le chat ! Comment puis-je vous aider ?
+                    Bienvenue dans VocalWave ! Comment puis-je vous aider ?
                 </div>
                 <!-- Messages will be added here dynamically -->
             </div>
             
             <!-- Chat input area - positioned at bottom with space -->
-            <div class="px-4 pt-2 pb-8 shadow-md bg-dark/90 backdrop-blur-sm sticky bottom-0 z-10 mt-auto">
+            <div class="px-4 pt-2 pb-8 shadow-md bg-darkbg/90 backdrop-blur-sm sticky bottom-0 z-10 mt-auto">
                 <div id="chat-input-container" class="chat-input-container">
                     <input 
                         id="message-input" 
@@ -433,229 +437,35 @@
                 </div>
             </div>
         </main>
-        
-        <!-- Install Prompt -->
-        <div id="install-prompt" class="text-white">
-            <div class="flex justify-between items-start mb-3">
-                <div class="font-bold text-lg">Installer l'application</div>
-                <button id="close-prompt" class="text-gray-400 hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
-                </button>
-            </div>
-            <p class="text-gray-300 mb-4">Installez VoiceWave sur votre appareil pour une expérience optimale, même hors ligne.</p>
-            <div class="flex space-x-3">
-                <button id="install-button" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg flex-grow">Installer</button>
-                <button id="install-later" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">Plus tard</button>
-            </div>
-        </div>
     </div>
 
     <script>
-        // === SERVICE WORKER REGISTRATION ===
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                // Create an inline service worker with improved caching
-                const swCode = `
-                    const CACHE_NAME = 'voicewave-cache-v1';
-                    const STATIC_RESOURCES = [
-                        './',
-                        './index.html',
-                        './manifest.json'
-                    ];
-
-                    // Install event - cache static resources
-                    self.addEventListener('install', (event) => {
-                        event.waitUntil(
-                            caches.open(CACHE_NAME)
-                                .then((cache) => {
-                                    console.log('Service Worker: Caching static files');
-                                    return cache.addAll(STATIC_RESOURCES);
-                                })
-                                .then(() => self.skipWaiting()) // Force service worker activation
-                        );
-                    });
-
-                    // Activate event - clean up old caches
-                    self.addEventListener('activate', (event) => {
-                        event.waitUntil(
-                            caches.keys().then((cacheNames) => {
-                                return Promise.all(
-                                    cacheNames.filter((cacheName) => {
-                                        return cacheName !== CACHE_NAME;
-                                    }).map((cacheName) => {
-                                        console.log('Service Worker: Removing old cache', cacheName);
-                                        return caches.delete(cacheName);
-                                    })
-                                );
-                            }).then(() => self.clients.claim()) // Take control of clients immediately
-                        );
-                    });
-
-                    // Fetch event - serve from cache or network
-                    self.addEventListener('fetch', (event) => {
-                        event.respondWith(
-                            caches.match(event.request)
-                                .then((cachedResponse) => {
-                                    // Return cached response if available
-                                    if (cachedResponse) {
-                                        return cachedResponse;
-                                    }
-                                    
-                                    // Otherwise fetch from network
-                                    return fetch(event.request)
-                                        .then((networkResponse) => {
-                                            // Don't cache non-successful responses or non-GET requests
-                                            if (!networkResponse || networkResponse.status !== 200 || event.request.method !== 'GET') {
-                                                return networkResponse;
-                                            }
-                                            
-                                            // Clone the response to cache it and return it
-                                            const responseToCache = networkResponse.clone();
-                                            caches.open(CACHE_NAME)
-                                                .then((cache) => {
-                                                    cache.put(event.request, responseToCache);
-                                                });
-                                                
-                                            return networkResponse;
-                                        })
-                                        .catch((error) => {
-                                            console.error('Service Worker: Fetch error', error);
-                                            // You could return a custom offline page here
-                                        });
-                                })
-                        );
-                    });
-                `;
-
-                const swBlob = new Blob([swCode], { type: 'text/javascript' });
-                const swURL = URL.createObjectURL(swBlob);
-
-                navigator.serviceWorker.register(swURL)
-                    .then(registration => {
-                        console.log('Service Worker registered with scope:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.error('Service Worker registration failed:', error);
-                    });
-            });
-        }
-
-        // Create manifest.json and serve it
-        const manifestContent = {
-            "name": "VoiceWave Chat",
-            "short_name": "VoiceWave",
-            "description": "Application de chat vocal avec visualisation d'ondes sonores",
-            "start_url": "/",
-            "display": "standalone",
-            "background_color": "#000000",
-            "theme_color": "#000000",
-            "orientation": "portrait",
-            "categories": ["productivity", "communication"],
-            "icons": [
-                {
-                    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzRGNDZFNSIvPjxwYXRoIGZpbGw9IiNGRkYiIGQ9Ik02NSA1MGMwIDguMy02LjcgMTUtMTUgMTVzLTE1LTYuNy0xNS0xNSA2LjctMTUgMTUtMTUgMTUgNi43IDE1IDE1em0tNy41IDBjMC00LjEtMy40LTcuNS03LjUtNy41cy03LjUgMy40LTcuNSA3LjUgMy40IDcuNSA3LjUgNy41IDcuNS0zLjQgNy41LTcuNXpNNzMuMyAyNi43Yy0zLjMtMy4zLTguNy0zLjMtMTIgMEw1MCA0MWwtMTEuMy0xMS4zYy0zLjMtMy4zLTguNy0zLjMtMTIgMHMtMy4zIDguNyAwIDEybDE3LjQgMTcuNGMzLjMgMy4zIDguNyAzLjMgMTIgMEw3My4zIDM4LjdjMy4zLTMuMyAzLjMtOC43IDAtMTJ6Ii8+PC9zdmc+",
-                    "sizes": "512x512",
-                    "type": "image/svg+xml",
-                    "purpose": "any"
-                },
-                {
-                    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzRGNDZFNSIvPjxwYXRoIGZpbGw9IiNGRkYiIGQ9Ik02NSA1MGMwIDguMy02LjcgMTUtMTUgMTVzLTE1LTYuNy0xNS0xNSA2LjctMTUgMTUtMTUgMTUgNi43IDE1IDE1em0tNy41IDBjMC00LjEtMy40LTcuNS03LjUtNy41cy03LjUgMy40LTcuNSA3LjUgMy40IDcuNSA3LjUgNy41IDcuNS0zLjQgNy41LTcuNXpNNzMuMyAyNi43Yy0zLjMtMy4zLTguNy0zLjMtMTIgMEw1MCA0MWwtMTEuMy0xMS4zYy0zLjMtMy4zLTguNy0zLjMtMTIgMHMtMy4zIDguNyAwIDEybDE3LjQgMTcuNGMzLjMgMy4zIDguNyAzLjMgMTIgMEw3My4zIDM4LjdjMy4zLTMuMyAzLjMtOC43IDAtMTJ6Ii8+PC9zdmc+",
-                    "sizes": "192x192",
-                    "type": "image/svg+xml",
-                    "purpose": "maskable"
-                }
-            ]
-        };
-
-        const manifestBlob = new Blob([JSON.stringify(manifestContent)], { type: 'application/json' });
-        const manifestURL = URL.createObjectURL(manifestBlob);
-        document.querySelector('link[rel="manifest"]').href = manifestURL;
-
-        // === PWA INSTALL PROMPT ===
-        let deferredPrompt;
-        const installPrompt = document.getElementById('install-prompt');
-        const installButton = document.getElementById('install-button');
-        const closePromptButton = document.getElementById('close-prompt');
-        const installLaterButton = document.getElementById('install-later');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevent Chrome 67 and earlier from automatically showing the prompt
-            e.preventDefault();
-            // Stash the event so it can be triggered later
-            deferredPrompt = e;
-            // Show the install prompt
-            setTimeout(() => {
-                installPrompt.style.display = 'block';
-            }, 3000);
-        });
-
-        installButton.addEventListener('click', () => {
-            // Hide the app provided install promotion
-            installPrompt.style.display = 'none';
-            // Show the install prompt
-            deferredPrompt.prompt();
-            // Wait for the user to respond to the prompt
-            deferredPrompt.userChoice.then((choiceResult) => {
-                if (choiceResult.outcome === 'accepted') {
-                    console.log('User accepted the install prompt');
-                } else {
-                    console.log('User dismissed the install prompt');
-                }
-                deferredPrompt = null;
-            });
-        });
-
-        closePromptButton.addEventListener('click', () => {
-            installPrompt.style.display = 'none';
-        });
-
-        installLaterButton.addEventListener('click', () => {
-            installPrompt.style.display = 'none';
-        });
-
-        // === DARK MODE SUPPORT ===
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.classList.add('dark');
-        }
-
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-            if (event.matches) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        });
-
         // === CONFIGURATION ===
         const config = {
             visualization: {
-                analyserFftSize: 512,
-                smoothingTimeConstant: 0.5,
-                dotCount: 32,              // Number of dots in the wave visualization
-                minAmplitude: 0.1,         // Minimum dot amplitude (multiples of base height)
-                maxAmplitude: 2.5,         // Maximum dot amplitude (multiples of base height)
-                silenceThreshold: 10,      // Threshold for considering audio as silence (0-255)
-                analysisInterval: 50,      // How often to update the wave in ms
-                dotBaseColor: '#0082E6',   // Base color for dots
-                dotActiveColor: '#4285F4'  // Color for more active dots
+                barCount: 45,
+                minBarHeight: 3,
+                maxBarHeight: 120,
+                analyserFftSize: 256,
+                smoothingTimeConstant: 0.85
             },
             messages: {
                 idle: "Appuyez pour parler",
-                listening: "Je vous écoute",
-                processing: "Traitement en cours..."
+                listening: "Je vous écoute"
             }
         };
 
         // === INITIALISATIONS ===
         
+        // Force dark mode by default to match the image aesthetic
+        document.documentElement.classList.add('dark');
+        
         // DOM elements
         const elements = {
             micButton: document.getElementById('mic-button'),
             cancelButton: document.getElementById('cancel-button'),
-            waveVisualizer: document.getElementById('wave-visualizer'),
-            linearWave: document.getElementById('linear-wave'),
+            audioVisualizer: document.getElementById('audio-visualizer'),
+            visualizerBars: document.getElementById('visualizer-bars'),
             statusText: document.getElementById('status-text'),
             transcription: document.getElementById('transcription'),
             
@@ -679,60 +489,44 @@
         // State variables
         const state = {
             isListening: false,
+            barElements: [],
             recognition: null,
             audioContext: null,
             analyser: null,
             microphone: null,
             dataArray: null,
             
-            // Audio stream and monitoring
-            audioStream: null,
-            microphoneActive: false,
-            
-            // Wave visualization
-            waveDots: [],
-            updateInterval: null,
-            
             // Chat state
             currentMode: 'voice', // 'voice' or 'chat'
             messages: [] // To store chat messages
         };
         
-        // === WAVE VISUALIZATION SETUP ===
+        // === INTERFACE SETUP ===
         
-        // Initialize dots for the linear wave
-        function initializeWaveDots() {
-            const container = elements.linearWave;
-            container.innerHTML = ''; // Clear any existing dots
-            state.waveDots = [];
+        // Create audio visualizer bars with varying heights for a wave effect
+        function createVisualizerBars() {
+            const { barCount } = config.visualization;
             
-            // Create dots
-            for (let i = 0; i < config.visualization.dotCount; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'wave-dot';
-                container.appendChild(dot);
-                state.waveDots.push(dot);
+            for (let i = 0; i < barCount; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                
+                // Calculate a sine wave pattern for initial heights
+                const baseHeight = Math.sin((i / barCount) * Math.PI) * 20;
+                const initialHeight = Math.max(config.visualization.minBarHeight, baseHeight);
+                bar.style.height = `${initialHeight}px`;
+                
+                // Slight width variation
+                const randomWidth = 4 + Math.random() * 2;
+                bar.style.width = `${randomWidth}px`;
+                bar.style.borderRadius = `${randomWidth}px`;
+                
+                // Add slight delay to each bar's animation
+                bar.style.transitionDelay = `${i * 10}ms`;
+                
+                elements.visualizerBars.appendChild(bar);
+                state.barElements.push(bar);
             }
-            
-            // Make the wave visible all the time
-            updateWaveDotsInitial();
-        }
-        
-        // Set initial state for dots (flat line)
-        function updateWaveDotsInitial() {
-            // Create a gentle wave pattern for the initial state
-            state.waveDots.forEach((dot, index) => {
-                // Initial height - slight variation for visual interest
-                const middlePoint = Math.floor(state.waveDots.length / 2);
-                const distFromMiddle = Math.abs(index - middlePoint) / middlePoint;
-                let initialScale = 1 - (distFromMiddle * 0.5); // Higher in middle, lower at edges
-                
-                // Apply the scale transform
-                dot.style.transform = `scaleY(${initialScale})`;
-                
-                // Slightly vary opacity for visual interest
-                dot.style.opacity = 0.2 + (initialScale * 0.5);
-            });
         }
         
         // === VOICE RECOGNITION AND AUDIO ANALYSIS ===
@@ -785,20 +579,16 @@
                 if (event.error === 'no-speech') {
                     // Just a notification, not a critical error
                     console.log("No speech detected");
-                } else if (event.error === 'audio-capture' || event.error === 'network') {
-                    // These are more serious errors, might need to stop
+                } else {
                     stopListening();
                 }
             };
             
             state.recognition.onend = () => {
-                console.log("Recognition ended");
-                
                 // Restart if still in listening mode (important for continuous listening)
                 if (state.isListening) {
                     try {
                         state.recognition.start();
-                        console.log("Recognition restarted");
                     } catch (e) {
                         console.log("Could not restart recognition:", e);
                     }
@@ -823,14 +613,12 @@
                 
                 // Request microphone access
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                state.audioStream = stream;
-                state.microphoneActive = true;
                 
                 // Connect microphone to analyzer
                 state.microphone = state.audioContext.createMediaStreamSource(stream);
                 state.analyser = state.audioContext.createAnalyser();
                 
-                // Configure analyzer
+                // Configure analyzer for smoother visualization
                 state.analyser.fftSize = config.visualization.analyserFftSize;
                 state.analyser.smoothingTimeConstant = config.visualization.smoothingTimeConstant;
                 
@@ -841,6 +629,9 @@
                 // Connect nodes
                 state.microphone.connect(state.analyser);
                 
+                // Start real-time analysis
+                visualizeAudio();
+                
                 return true;
             } catch (error) {
                 console.error("Error initializing audio analysis:", error);
@@ -848,131 +639,96 @@
             }
         }
         
-        // Start monitoring audio levels and update wave visualization
-        function startAudioMonitoring() {
+        // Real-time audio visualization with wave-like movement
+        function visualizeAudio() {
             if (!state.analyser) return;
             
-            // Start analysis interval
-            state.updateInterval = setInterval(() => {
-                if (!state.isListening || !state.analyser) {
-                    clearInterval(state.updateInterval);
-                    state.updateInterval = null;
-                    return;
-                }
-                
+            function updateVisualization() {
                 // Get frequency data
                 state.analyser.getByteFrequencyData(state.dataArray);
                 
-                // Update wave visualization
-                updateWaveDots();
+                // Update bars
+                const bufferLength = state.analyser.frequencyBinCount;
+                const barCount = state.barElements.length;
                 
-            }, config.visualization.analysisInterval);
-        }
-        
-        // Update the wave dots based on the audio data
-        function updateWaveDots() {
-            if (!state.waveDots.length || !state.dataArray) return;
-            
-            // For each dot, calculate its height based on audio data
-            state.waveDots.forEach((dot, index) => {
-                // Get a frequency bin for this dot
-                const binIndex = Math.floor(index * (state.dataArray.length / state.waveDots.length));
-                let value = state.dataArray[binIndex];
-                
-                // Normalize the value (0-1) and apply a curve for better visual response
-                const amplitude = Math.max(config.visualization.minAmplitude, 
-                                          Math.min(config.visualization.maxAmplitude, 
-                                                  Math.pow(value / 255, 2) * 
-                                                  config.visualization.maxAmplitude));
-                
-                // Apply smooth transitions
-                dot.style.transform = `scaleY(${amplitude})`;
-                
-                // Adjust opacity and color based on activity
-                if (value > 50) {
-                    dot.classList.add('active');
-                    dot.style.opacity = 0.2 + Math.min(0.8, value / 255);
-                } else {
-                    dot.classList.remove('active');
-                    dot.style.opacity = 0.2 + Math.min(0.4, value / 255);
+                // Wave animation even when not listening
+                if (!state.isListening) {
+                    const time = Date.now() / 1000;
+                    for (let i = 0; i < barCount; i++) {
+                        // Create a gentle wave pattern
+                        const waveHeight = Math.sin((i / barCount * Math.PI * 4) + time) * 10 + 15;
+                        const height = Math.max(config.visualization.minBarHeight, waveHeight);
+                        state.barElements[i].style.height = `${height}px`;
+                    }
+                } 
+                // More dynamic, audio-responsive visualization when listening
+                else if (state.isListening && elements.audioVisualizer.classList.contains('active')) {
+                    // Map frequency data to bars
+                    for (let i = 0; i < barCount; i++) {
+                        // Calculate which part of the frequency spectrum corresponds to this bar
+                        const dataIndex = Math.floor(i * bufferLength / barCount);
+                        
+                        // Get value (0-255)
+                        let value = state.dataArray[dataIndex];
+                        
+                        // Amplify voice frequencies (middle range)
+                        if (dataIndex > bufferLength * 0.1 && dataIndex < bufferLength * 0.8) {
+                            value = value * 1.3;
+                        }
+                        
+                        // Apply wave-like pattern on top of audio data
+                        const time = Date.now() / 1000;
+                        const waveFactor = Math.sin((i / barCount * Math.PI * 2) + time) * 5;
+                        
+                        // Convert to bar height (non-linear scale for better visualization)
+                        const height = Math.max(
+                            config.visualization.minBarHeight,
+                            Math.pow(value / 255, 1.2) * config.visualization.maxBarHeight + waveFactor
+                        );
+                        
+                        // Apply height
+                        state.barElements[i].style.height = `${height}px`;
+                    }
                 }
-            });
-        }
-        
-        // Stop audio monitoring and reset wave
-        function stopAudioMonitoring() {
-            if (state.updateInterval) {
-                clearInterval(state.updateInterval);
-                state.updateInterval = null;
+                
+                // Continue animation loop
+                requestAnimationFrame(updateVisualization);
             }
             
-            // Reset to gentle initial state
-            updateWaveDotsInitial();
+            // Start animation loop
+            updateVisualization();
         }
         
         // === VOICE INPUT MANAGEMENT ===
         
-        // Start voice listening with robust error handling
+        // Start voice listening
         async function startListening() {
+            // Clear previous transcript
+            elements.transcription.textContent = "";
+            
+            // First-time initialization
+            if (!state.analyser && !state.recognition) {
+                const recognitionReady = setupSpeechRecognition();
+                const analysisReady = await setupAudioAnalysis();
+                
+                if (!recognitionReady || !analysisReady) {
+                    alert("Impossible d'initialiser la reconnaissance vocale ou l'analyse audio");
+                    return;
+                }
+            }
+            
+            // Start voice recognition
             try {
-                // Clear previous transcript
-                elements.transcription.textContent = "";
-                
-                // First-time initialization
-                if (!state.analyser && !state.recognition) {
-                    // Set up wave visualization
-                    initializeWaveDots();
-                    
-                    // Set up audio processing
-                    const recognitionReady = setupSpeechRecognition();
-                    const analysisReady = await setupAudioAnalysis();
-                    
-                    if (!recognitionReady || !analysisReady) {
-                        alert("Impossible d'initialiser la reconnaissance vocale ou l'analyse audio");
-                        return;
-                    }
-                } else if (state.audioContext && state.audioContext.state === 'suspended') {
-                    // Resume audio context if suspended
-                    await state.audioContext.resume();
+                if (state.recognition) {
+                    state.recognition.start();
                 }
-                
-                // Set listening state
-                state.isListening = true;
-                
-                // Start voice recognition
-                try {
-                    if (state.recognition) {
-                        state.recognition.start();
-                    }
-                } catch (error) {
-                    console.warn("Recognition already started or error:", error);
-                    
-                    // Try to stop and restart if it's already running
-                    try {
-                        state.recognition.stop();
-                        setTimeout(() => {
-                            state.recognition.start();
-                        }, 200);
-                    } catch (e) {
-                        console.error("Could not restart recognition:", e);
-                    }
-                }
-                
-                // Start audio monitoring for wave visualization
-                startAudioMonitoring();
-                
-                // Update UI state
-                updateListeningState(true);
             } catch (error) {
-                console.error("Error in startListening:", error);
-                stopListening(); // Clean up if there's an error
-                alert("Une erreur s'est produite lors de l'activation du microphone.");
+                console.error("Error starting recognition:", error);
             }
         }
         
-        // Stop voice listening with reliable cleanup
+        // Stop voice listening
         function stopListening() {
-            // Update state
             state.isListening = false;
             
             // Stop recognition if active
@@ -983,9 +739,6 @@
                     console.log("Recognition was already stopped");
                 }
             }
-            
-            // Stop audio monitoring
-            stopAudioMonitoring();
             
             // Update UI
             updateListeningState(false);
@@ -998,13 +751,20 @@
                 config.messages.listening : 
                 config.messages.idle;
             
-            // Clear transcription with delay (for better UX)
-            if (!isListening) {
+            // Update visualizer
+            if (isListening) {
+                elements.audioVisualizer.classList.add('active');
+                // Temporarily stop floating animation on mic button when listening
+                elements.micButton.classList.remove('floating');
+            } else {
+                elements.audioVisualizer.classList.remove('active');
+                // Resume floating animation
+                elements.micButton.classList.add('floating');
+                
+                // Clear transcription after a short delay
                 setTimeout(() => {
-                    if (!state.isListening) {
-                        elements.transcription.textContent = "";
-                    }
-                }, 500);
+                    elements.transcription.textContent = "";
+                }, 1500);
             }
             
             // Update button appearance
@@ -1028,7 +788,7 @@
             
             // Update title and toggle button icons
             if (mode === 'voice') {
-                elements.appTitle.textContent = 'VoiceWave Chat';
+                elements.appTitle.textContent = 'VocalWave';
                 elements.chatIcon.classList.remove('hidden');
                 elements.micIcon.classList.add('hidden');
                 
@@ -1049,7 +809,7 @@
                     }, 400);
                 }, 400);
             } else {
-                elements.appTitle.textContent = 'Chat Écrit';
+                elements.appTitle.textContent = 'TextWave';
                 elements.chatIcon.classList.add('hidden');
                 elements.micIcon.classList.remove('hidden');
                 
@@ -1129,8 +889,7 @@
         
         // Initialize the application
         function initializeApp() {
-            // Create wave visualization
-            initializeWaveDots();
+            createVisualizerBars();
             
             // Voice button events
             elements.micButton.addEventListener('click', () => {
@@ -1159,11 +918,11 @@
             
             // Dynamic input effects
             elements.messageInput.addEventListener('focus', () => {
-                elements.chatInputContainer.classList.add('shadow-lg');
+                elements.chatInputContainer.classList.add('shadow-glow/30');
             });
             
             elements.messageInput.addEventListener('blur', () => {
-                elements.chatInputContainer.classList.remove('shadow-lg');
+                elements.chatInputContainer.classList.remove('shadow-glow/30');
             });
             
             // Send message on Enter key
@@ -1179,48 +938,6 @@
                     elements.sendMessage.classList.add('scale-110');
                 } else {
                     elements.sendMessage.classList.remove('scale-110');
-                }
-            });
-            
-            // Handle URL parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('mode') === 'chat') {
-                switchMode('chat');
-            }
-            
-            // Prevent app from going to sleep when active
-            if ('wakeLock' in navigator) {
-                // Try to acquire a wakelock when the user interacts with the mic
-                elements.micButton.addEventListener('click', async () => {
-                    if (state.isListening) {
-                        try {
-                            const wakeLock = await navigator.wakeLock.request('screen');
-                            
-                            // Release the wakelock when the mic is stopped
-                            wakeLock.addEventListener('release', () => {
-                                console.log('Wake Lock released');
-                            });
-                            
-                            // Also release it when the user leaves the page
-                            document.addEventListener('visibilitychange', () => {
-                                if (document.visibilityState === 'hidden' && wakeLock) {
-                                    wakeLock.release();
-                                }
-                            });
-                        } catch (err) {
-                            console.log(`Wake Lock error: ${err.name}, ${err.message}`);
-                        }
-                    }
-                });
-            }
-            
-            // Make sure the visualization works after the app returns from background
-            document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible' && state.isListening) {
-                    // Resume the audio context if it got suspended
-                    if (state.audioContext && state.audioContext.state === 'suspended') {
-                        state.audioContext.resume();
-                    }
                 }
             });
         }
